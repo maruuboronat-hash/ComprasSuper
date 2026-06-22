@@ -88,6 +88,80 @@
             background: #229954;
         }
 
+        /* Contenedor para agregar categoría (arriba de todo) */
+        .add-categoria-top {
+            background: white;
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            display: none;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            border: 2px dashed #bdc3c7;
+        }
+
+        .add-categoria-top.show {
+            display: flex;
+        }
+
+        .add-categoria-top input {
+            flex: 1;
+            min-width: 150px;
+            padding: 10px 14px;
+            border: 2px solid #bdc3c7;
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.3s;
+            background: white;
+            font-family: inherit;
+        }
+
+        .add-categoria-top input:focus {
+            border-color: #3498db;
+        }
+
+        .add-categoria-top select {
+            padding: 10px 14px;
+            border: 2px solid #bdc3c7;
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+            background: white;
+            font-family: inherit;
+            cursor: pointer;
+            min-width: 120px;
+        }
+
+        .add-categoria-top select:focus {
+            border-color: #3498db;
+        }
+
+        .btn-add-categoria-top {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            touch-action: manipulation;
+            white-space: nowrap;
+        }
+
+        .btn-add-categoria-top:active {
+            transform: scale(0.95);
+        }
+
+        .btn-add-categoria-top:hover {
+            background: #27ae60;
+        }
+
+        /* Wrapper para arrastrar categorías */
         .categoria-wrapper {
             transition: all 0.3s ease;
         }
@@ -126,6 +200,7 @@
             flex: 1;
         }
 
+        /* Rayitas para arrastrar categoría */
         .cat-drag-handle {
             color: #bdc3c7;
             font-size: 20px;
@@ -187,6 +262,7 @@
             transform: scale(0.9);
         }
 
+        /* Botón eliminar categoría */
         .cat-delete-btn {
             background: #e74c3c;
             color: white;
@@ -387,85 +463,15 @@
             display: flex !important;
         }
 
+        .edit-mode .add-categoria-top {
+            display: flex !important;
+        }
+
         .empty-message {
             text-align: center;
             color: #bdc3c7;
             padding: 20px;
             font-size: 16px;
-        }
-
-        /* Agregar categoría */
-        .add-categoria-container {
-            background: white;
-            border-radius: 16px;
-            padding: 18px;
-            margin-top: 16px;
-            border: 2px dashed #bdc3c7;
-            transition: all 0.3s;
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .add-categoria-container:focus-within {
-            border-color: #3498db;
-            background: #f8f9fa;
-        }
-
-        .add-categoria-input {
-            flex: 1;
-            min-width: 150px;
-            padding: 10px 14px;
-            border: 2px solid #bdc3c7;
-            border-radius: 10px;
-            font-size: 15px;
-            outline: none;
-            transition: border-color 0.3s;
-            background: white;
-            font-family: inherit;
-        }
-
-        .add-categoria-input:focus {
-            border-color: #3498db;
-        }
-
-        .add-categoria-select {
-            padding: 10px 14px;
-            border: 2px solid #bdc3c7;
-            border-radius: 10px;
-            font-size: 15px;
-            outline: none;
-            background: white;
-            font-family: inherit;
-            cursor: pointer;
-            min-width: 120px;
-        }
-
-        .add-categoria-select:focus {
-            border-color: #3498db;
-        }
-
-        .btn-add-categoria {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            touch-action: manipulation;
-            white-space: nowrap;
-        }
-
-        .btn-add-categoria:active {
-            transform: scale(0.95);
-        }
-
-        .btn-add-categoria:hover {
-            background: #2980b9;
         }
 
         /* Responsive */
@@ -510,13 +516,13 @@
                 font-size: 16px;
             }
 
-            .add-categoria-container {
-                padding: 14px;
+            .add-categoria-top {
+                padding: 12px;
                 flex-direction: column;
             }
 
-            .add-categoria-input,
-            .add-categoria-select {
+            .add-categoria-top input,
+            .add-categoria-top select {
                 width: 100%;
                 min-width: unset;
             }
@@ -539,12 +545,10 @@
         <button class="btn btn-edit" id="editBtn">✏️ Editar</button>
     </div>
 
-    <div id="listaContainer"></div>
-
-    <!-- Agregar categoría -->
-    <div class="add-categoria-container" id="addCategoriaContainer">
-        <input type="text" class="add-categoria-input" id="addCategoriaInput" placeholder="Nueva categoría...">
-        <select class="add-categoria-select" id="addCategoriaIcon">
+    <!-- Contenedor para agregar categoría (arriba de todo) -->
+    <div class="add-categoria-top" id="addCategoriaTop">
+        <input type="text" id="addCategoriaInput" placeholder="Nueva categoría...">
+        <select id="addCategoriaIcon">
             <option value="🛒">🛒 General</option>
             <option value="🥬">🥬 Verduras</option>
             <option value="🧀">🧀 Lácteos</option>
@@ -560,8 +564,10 @@
             <option value="🧁">🧁 Dulces</option>
             <option value="🌿">🌿 Salud</option>
         </select>
-        <button class="btn-add-categoria" id="addCategoriaBtn">➕ Agregar</button>
+        <button class="btn-add-categoria-top" id="addCategoriaBtn">➕ Agregar</button>
     </div>
+
+    <div id="listaContainer"></div>
 
     <script>
         // ============================================================
@@ -696,11 +702,6 @@
             return cat ? cat.nombre : catId;
         }
 
-        function getCategoryEmoji(catId) {
-            const cat = categories.find(c => c.id === catId);
-            return cat ? cat.emoji : '🛒';
-        }
-
         // ============================================================
         // RENDER
         // ============================================================
@@ -708,7 +709,7 @@
             const container = document.getElementById('listaContainer');
             container.innerHTML = '';
 
-            categories.forEach((cat, catIndex) => {
+            categories.forEach((cat) => {
                 const items = data[cat.id] || [];
 
                 const wrapper = document.createElement('div');
@@ -856,7 +857,6 @@
             if (data[cat] && data[cat][index]) {
                 data[cat][index].checked = e.target.checked;
                 saveData();
-                // Actualizar visualmente sin re-renderizar todo
                 const textSpan = e.target.closest('.item').querySelector('.item-text');
                 if (textSpan) {
                     textSpan.classList.toggle('checked', e.target.checked);
@@ -896,7 +896,6 @@
                 data[cat].push({ text: text, checked: false });
                 saveData();
                 render();
-                // Re-enfocar el input después de renderizar
                 setTimeout(() => {
                     const newInput = container.querySelector('.add-item-input');
                     if (newInput) {
@@ -1103,14 +1102,4 @@
         function handleReset() {
             if (confirm('¿Reiniciar todos los ítems? (se desmarcarán todos)')) {
                 Object.keys(data).forEach(cat => {
-                    data[cat].forEach(item => { item.checked = false; });
-                });
-                saveData();
-                render();
-            }
-        }
-
-        function handleEditToggle() {
-            editMode = !editMode;
-            const btn = document.getElementById('editBtn');
-            btn.textContent = editMode ? '✅ Listo' : '✏️ Ed
+                    data[cat].forEach(item =>
