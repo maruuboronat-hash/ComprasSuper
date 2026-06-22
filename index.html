@@ -23,7 +23,6 @@
             color: #1a1a2e;
         }
 
-        /* HEADER */
         .header {
             background: white;
             border-radius: 20px;
@@ -106,10 +105,6 @@
             transform: translateY(-2px);
         }
 
-        .btn-primary:active {
-            transform: scale(0.95) translateY(0);
-        }
-
         .btn-outline {
             border-color: #e5e7eb;
         }
@@ -117,16 +112,6 @@
         .btn-outline:hover {
             background: #f8f9fa;
             border-color: #d1d5db;
-        }
-
-        .btn-danger-outline {
-            border-color: #fecaca;
-            color: #dc2626;
-        }
-
-        .btn-danger-outline:hover {
-            background: #fef2f2;
-            border-color: #fca5a5;
         }
 
         .btn-success {
@@ -142,18 +127,6 @@
             transform: translateY(-2px);
         }
 
-        .btn-icon {
-            width: 38px;
-            height: 38px;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px;
-            font-size: 18px;
-        }
-
-        /* CATEGORÍAS */
         .categorias-container {
             display: flex;
             flex-direction: column;
@@ -216,11 +189,6 @@
             user-select: none;
             padding: 4px;
             touch-action: none;
-            transition: color 0.2s;
-        }
-
-        .cat-drag-handle:hover {
-            color: #7C3AED;
         }
 
         .cat-drag-handle.show {
@@ -228,25 +196,9 @@
         }
 
         .cat-icon {
-            width: 32px;
-            height: 32px;
+            font-size: 22px;
             min-width: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f3f0ff;
-            border-radius: 8px;
-            color: #7C3AED;
-        }
-
-        .cat-icon svg {
-            width: 18px;
-            height: 18px;
-            fill: none;
-            stroke: currentColor;
-            stroke-width: 2;
-            stroke-linecap: round;
-            stroke-linejoin: round;
+            text-align: center;
         }
 
         .categoria-titulo {
@@ -351,7 +303,6 @@
             transform: scale(0.9);
         }
 
-        /* ITEMS */
         .items-container {
             display: flex;
             flex-direction: column;
@@ -434,10 +385,22 @@
             color: #94a3b8;
         }
 
-        .item-actions {
-            display: flex;
-            gap: 4px;
-            align-items: center;
+        .item-drag-handle {
+            color: #d1d5db;
+            font-size: 16px;
+            cursor: grab;
+            display: none;
+            user-select: none;
+            padding: 2px;
+            touch-action: none;
+        }
+
+        .item-drag-handle.show {
+            display: block;
+        }
+
+        .item-drag-handle:hover {
+            color: #7C3AED;
         }
 
         .item-delete {
@@ -467,26 +430,6 @@
             transform: scale(0.8);
         }
 
-        .item-drag-handle {
-            color: #d1d5db;
-            font-size: 16px;
-            cursor: grab;
-            display: none;
-            user-select: none;
-            padding: 2px;
-            touch-action: none;
-            transition: color 0.2s;
-        }
-
-        .item-drag-handle.show {
-            display: block;
-        }
-
-        .item-drag-handle:hover {
-            color: #7C3AED;
-        }
-
-        /* AGREGAR ITEM */
         .add-item-container {
             display: none;
             margin-top: 12px;
@@ -550,7 +493,6 @@
             font-weight: 450;
         }
 
-        /* AGREGAR CATEGORÍA */
         .add-categoria-container {
             background: white;
             border-radius: 16px;
@@ -604,7 +546,6 @@
             box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.08);
         }
 
-        /* Responsive */
         @media (max-width: 600px) {
             body {
                 padding: 12px;
@@ -657,12 +598,6 @@
             }
         }
 
-        /* Scroll suave */
-        .categorias-container {
-            scroll-behavior: smooth;
-        }
-
-        /* Animación de entrada */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -688,14 +623,8 @@
                 <span class="badge" id="totalItems">0 items</span>
             </div>
             <div class="header-actions">
-                <button class="btn btn-outline" id="resetBtn">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
-                    Reiniciar
-                </button>
-                <button class="btn btn-primary" id="editBtn">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                    Editar
-                </button>
+                <button class="btn btn-outline" id="resetBtn">🔄 Reiniciar</button>
+                <button class="btn btn-primary" id="editBtn">✏️ Editar</button>
             </div>
         </div>
     </div>
@@ -725,47 +654,6 @@
 
     <script>
         // ============================================================
-        // ICONOS SVG POR CATEGORÍA
-        // ============================================================
-        const iconMap = {
-            '🥬': 'leaf',
-            '🧀': 'cheese',
-            '🥫': 'package',
-            '🍞': 'bread',
-            '🥩': 'meat',
-            '❄️': 'snowflake',
-            '☕': 'coffee',
-            '🧹': 'broom',
-            '🧴': 'bottle',
-            '🥤': 'drink',
-            '🛒': 'shopping-cart',
-            '🍕': 'pizza',
-            '🧁': 'cake',
-            '🌿': 'leaf'
-        };
-
-        function getIconSVG(emoji) {
-            const iconName = iconMap[emoji] || 'shopping-cart';
-            const svgs = {
-                'leaf': `<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>`,
-                'cheese': `<path d="M4 7.5L12 4l8 3.5L12 11 4 7.5z"/><path d="M4 7.5v8.5l8 3.5 8-3.5V7.5"/><path d="M12 11v8.5"/>`,
-                'package': `<path d="M4 7l8 4 8-4"/><path d="M4 7v9l8 4 8-4V7"/><path d="M12 11v9"/>`,
-                'bread': `<path d="M12 4a8 8 0 0 0-8 8c0 3.314 2.686 6 6 6h4c3.314 0 6-2.686 6-6a8 8 0 0 0-8-8z"/><path d="M8 12h8"/>`,
-                'meat': `<path d="M18 6a3 3 0 0 0-3-3H9a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V6z"/><path d="M9 6h6"/><path d="M9 10h6"/><path d="M9 14h4"/>`,
-                'snowflake': `<path d="M12 2v20"/><path d="M12 4L9 7"/><path d="M12 4l3 3"/><path d="M12 20l-3-3"/><path d="M12 20l3-3"/><path d="M4 12h16"/><path d="M4 12l3-3"/><path d="M4 12l3 3"/><path d="M20 12l-3-3"/><path d="M20 12l-3 3"/>`,
-                'coffee': `<path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8z"/><path d="M6 2v3"/><path d="M10 2v3"/><path d="M14 2v3"/>`,
-                'broom': `<path d="M3 21l7-7"/><path d="M10 14l5-5"/><path d="M15 9l3-3"/><path d="M18 6l3-3"/><path d="M5 19l4-4"/><path d="M9 15l2-2"/>`,
-                'bottle': `<path d="M12 2v4"/><path d="M9 6h6"/><path d="M9 6a5 5 0 0 0-5 5v5a5 5 0 0 0 5 5h6a5 5 0 0 0 5-5v-5a5 5 0 0 0-5-5"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h2"/>`,
-                'drink': `<path d="M8 7h8"/><path d="M8 7l-1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l-1-12"/><path d="M12 7V3"/>`,
-                'shopping-cart': `<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>`,
-                'pizza': `<circle cx="12" cy="12" r="10"/><circle cx="9" cy="9" r="1.5"/><circle cx="15" cy="9" r="1.5"/><circle cx="12" cy="15" r="2"/>`,
-                'cake': `<path d="M12 2a4 4 0 0 0-4 4v2H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-2V6a4 4 0 0 0-4-4z"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h8"/>`
-            };
-            const svgContent = svgs[iconName] || svgs['shopping-cart'];
-            return `<svg viewBox="0 0 24 24">${svgContent}</svg>`;
-        }
-
-        // ============================================================
         // DATOS INICIALES
         // ============================================================
         const categoriasData = [
@@ -792,7 +680,6 @@
         let catDragData = null;
         let catDragOverData = null;
 
-        // Cargar desde localStorage
         function loadData() {
             const saved = localStorage.getItem('listaComprasPro');
             if (saved) {
@@ -801,12 +688,11 @@
                     if (parsed.categories && parsed.data) {
                         categories = parsed.categories;
                         data = parsed.data;
-                        // Asegurar que todas las categorías tengan data
+                        // Asegurar items iniciales
                         categories.forEach(cat => {
                             if (!data[cat.id]) {
                                 data[cat.id] = cat.items.map(item => ({ text: item, checked: false }));
                             } else {
-                                // Verificar items iniciales
                                 const existingTexts = data[cat.id].map(i => i.text);
                                 cat.items.forEach(item => {
                                     if (!existingTexts.includes(item)) {
@@ -818,11 +704,8 @@
                         saveData();
                         return;
                     }
-                } catch (e) {
-                    console.warn('Error al cargar datos, usando datos iniciales');
-                }
+                } catch (e) { console.warn('Error al cargar datos'); }
             }
-            // Datos iniciales
             categories = JSON.parse(JSON.stringify(categoriasData));
             data = {};
             categories.forEach(cat => {
@@ -842,16 +725,6 @@
             document.getElementById('totalItems').textContent = total + ' items';
         }
 
-        function getCategoryIcon(catId) {
-            const cat = categories.find(c => c.id === catId);
-            return cat ? cat.icon : '🛒';
-        }
-
-        function getCategoryName(catId) {
-            const cat = categories.find(c => c.id === catId);
-            return cat ? cat.nombre : catId;
-        }
-
         // ============================================================
         // RENDER
         // ============================================================
@@ -861,7 +734,6 @@
 
             categories.forEach((cat, catIndex) => {
                 const items = data[cat.id] || [];
-                const checkedCount = items.filter(i => i.checked).length;
 
                 const wrapper = document.createElement('div');
                 wrapper.className = 'categoria-wrapper';
@@ -872,14 +744,12 @@
                 div.className = 'categoria';
                 if (editMode) div.classList.add('edit-mode');
 
-                const isEditingName = editMode;
-
                 div.innerHTML = `
                     <div class="categoria-header">
                         <div class="categoria-header-left">
                             <span class="cat-drag-handle ${editMode ? 'show' : ''}">⠿</span>
-                            <span class="cat-icon">${getIconSVG(cat.icon)}</span>
-                            ${isEditingName ? 
+                            <span class="cat-icon">${cat.icon}</span>
+                            ${editMode ? 
                                 `<input type="text" class="categoria-titulo-input" value="${cat.nombre}" data-categoria-id="${cat.id}" placeholder="Nombre...">` :
                                 `<span class="categoria-titulo">${cat.nombre}</span>`
                             }
@@ -895,4 +765,276 @@
                         ${items.map((item, index) => `
                             <div class="item" data-categoria-id="${cat.id}" data-index="${index}" draggable="${editMode}">
                                 <span class="item-drag-handle ${editMode ? 'show' : ''}">⠿</span>
-                                <input type="checkbox" class="item-checkbox" ${item.checked ? 'checked'
+                                <input type="checkbox" class="item-checkbox" ${item.checked ? 'checked' : ''} data-categoria-id="${cat.id}" data-index="${index}">
+                                <span class="item-text ${item.checked ? 'checked' : ''}">${item.text}</span>
+                                <button class="item-delete ${editMode ? 'show' : ''}" data-categoria-id="${cat.id}" data-index="${index}">✕</button>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="add-item-container ${editMode ? 'show' : ''}" data-categoria-id="${cat.id}">
+                        <input type="text" class="add-item-input" placeholder="Nuevo item...">
+                        <button class="add-item-confirm" data-categoria-id="${cat.id}">Agregar</button>
+                    </div>
+                `;
+
+                wrapper.appendChild(div);
+                container.appendChild(wrapper);
+            });
+
+            attachEvents();
+            updateTotalCount();
+        }
+
+        // ============================================================
+        // EVENTOS
+        // ============================================================
+        function attachEvents() {
+            // Checkboxes
+            document.querySelectorAll('.item-checkbox').forEach(cb => {
+                cb.removeEventListener('change', handleCheckboxChange);
+                cb.addEventListener('change', handleCheckboxChange);
+            });
+
+            // Eliminar items
+            document.querySelectorAll('.item-delete').forEach(btn => {
+                btn.removeEventListener('click', handleItemDelete);
+                btn.addEventListener('click', handleItemDelete);
+            });
+
+            // Agregar items
+            document.querySelectorAll('.cat-add-btn').forEach(btn => {
+                btn.removeEventListener('click', handleAddBtnClick);
+                btn.addEventListener('click', handleAddBtnClick);
+            });
+
+            document.querySelectorAll('.add-item-confirm').forEach(btn => {
+                btn.removeEventListener('click', handleAddConfirm);
+                btn.addEventListener('click', handleAddConfirm);
+            });
+
+            document.querySelectorAll('.add-item-input').forEach(input => {
+                input.removeEventListener('keydown', handleAddInputKeydown);
+                input.addEventListener('keydown', handleAddInputKeydown);
+            });
+
+            // Editar nombre categoría
+            document.querySelectorAll('.categoria-titulo-input').forEach(input => {
+                input.removeEventListener('change', handleCategoryNameChange);
+                input.addEventListener('change', handleCategoryNameChange);
+                input.removeEventListener('blur', handleCategoryNameChange);
+                input.addEventListener('blur', handleCategoryNameChange);
+            });
+
+            // Eliminar categoría
+            document.querySelectorAll('.cat-delete-btn').forEach(btn => {
+                btn.removeEventListener('click', handleCategoryDelete);
+                btn.addEventListener('click', handleCategoryDelete);
+            });
+
+            // Drag & Drop items
+            if (editMode) {
+                document.querySelectorAll('.item').forEach(item => {
+                    item.removeEventListener('dragstart', handleDragStart);
+                    item.removeEventListener('dragend', handleDragEnd);
+                    item.removeEventListener('dragover', handleDragOver);
+                    item.removeEventListener('dragleave', handleDragLeave);
+                    item.removeEventListener('drop', handleDrop);
+                    item.addEventListener('dragstart', handleDragStart);
+                    item.addEventListener('dragend', handleDragEnd);
+                    item.addEventListener('dragover', handleDragOver);
+                    item.addEventListener('dragleave', handleDragLeave);
+                    item.addEventListener('drop', handleDrop);
+                });
+
+                // Drag & Drop categorías
+                document.querySelectorAll('.categoria-wrapper').forEach(wrapper => {
+                    wrapper.removeEventListener('dragstart', handleCatDragStart);
+                    wrapper.removeEventListener('dragend', handleCatDragEnd);
+                    wrapper.removeEventListener('dragover', handleCatDragOver);
+                    wrapper.removeEventListener('dragleave', handleCatDragLeave);
+                    wrapper.removeEventListener('drop', handleCatDrop);
+                    wrapper.addEventListener('dragstart', handleCatDragStart);
+                    wrapper.addEventListener('dragend', handleCatDragEnd);
+                    wrapper.addEventListener('dragover', handleCatDragOver);
+                    wrapper.addEventListener('dragleave', handleCatDragLeave);
+                    wrapper.addEventListener('drop', handleCatDrop);
+                });
+            }
+
+            // Botones principales
+            document.getElementById('resetBtn').removeEventListener('click', handleReset);
+            document.getElementById('resetBtn').addEventListener('click', handleReset);
+
+            document.getElementById('editBtn').removeEventListener('click', handleEditToggle);
+            document.getElementById('editBtn').addEventListener('click', handleEditToggle);
+
+            document.getElementById('addCategoriaBtn').removeEventListener('click', handleAddCategory);
+            document.getElementById('addCategoriaBtn').addEventListener('click', handleAddCategory);
+
+            document.getElementById('addCategoriaInput').removeEventListener('keydown', handleAddCategoryKeydown);
+            document.getElementById('addCategoriaInput').addEventListener('keydown', handleAddCategoryKeydown);
+        }
+
+        // ============================================================
+        // HANDLERS - ITEMS
+        // ============================================================
+        function handleCheckboxChange(e) {
+            const catId = e.target.dataset.categoriaId;
+            const index = parseInt(e.target.dataset.index);
+            if (data[catId] && data[catId][index]) {
+                data[catId][index].checked = e.target.checked;
+                saveData();
+                const textSpan = e.target.closest('.item').querySelector('.item-text');
+                if (textSpan) {
+                    textSpan.classList.toggle('checked', e.target.checked);
+                }
+                updateTotalCount();
+            }
+        }
+
+        function handleItemDelete(e) {
+            if (!editMode) return;
+            const catId = e.target.dataset.categoriaId;
+            const index = parseInt(e.target.dataset.index);
+            if (data[catId]) {
+                data[catId].splice(index, 1);
+                saveData();
+                render();
+            }
+        }
+
+        function handleAddBtnClick(e) {
+            const catId = e.target.dataset.categoriaId;
+            const container = e.target.closest('.categoria').querySelector('.add-item-container');
+            const input = container.querySelector('.add-item-input');
+            container.classList.toggle('show');
+            if (container.classList.contains('show')) {
+                input.focus();
+            }
+        }
+
+        function handleAddConfirm(e) {
+            const catId = e.target.dataset.categoriaId;
+            const container = e.target.closest('.categoria').querySelector('.add-item-container');
+            const input = container.querySelector('.add-item-input');
+            const text = input.value.trim();
+            if (text && data[catId]) {
+                data[catId].push({ text: text, checked: false });
+                saveData();
+                render();
+                setTimeout(() => {
+                    const newInput = container.querySelector('.add-item-input');
+                    if (newInput) {
+                        newInput.value = '';
+                        newInput.focus();
+                    }
+                }, 50);
+            }
+        }
+
+        function handleAddInputKeydown(e) {
+            if (e.key === 'Enter') {
+                const btn = e.target.closest('.categoria').querySelector('.add-item-confirm');
+                if (btn) btn.click();
+            }
+        }
+
+        // ============================================================
+        // HANDLERS - CATEGORÍAS
+        // ============================================================
+        function handleCategoryNameChange(e) {
+            const catId = e.target.dataset.categoriaId;
+            const newName = e.target.value.trim();
+            if (newName) {
+                const cat = categories.find(c => c.id === catId);
+                if (cat) {
+                    cat.nombre = newName;
+                    saveData();
+                    render();
+                }
+            }
+        }
+
+        function handleCategoryDelete(e) {
+            if (!editMode) return;
+            const catId = e.target.dataset.categoriaId;
+            if (categories.length <= 1) {
+                alert('Debe haber al menos una categoría');
+                return;
+            }
+            if (confirm(`¿Eliminar la categoría "${getCategoryName(catId)}" y todos sus items?`)) {
+                const index = categories.findIndex(c => c.id === catId);
+                if (index !== -1) {
+                    categories.splice(index, 1);
+                    delete data[catId];
+                    saveData();
+                    render();
+                }
+            }
+        }
+
+        function handleAddCategory() {
+            const input = document.getElementById('addCategoriaInput');
+            const select = document.getElementById('addCategoriaIcon');
+            const name = input.value.trim();
+            const icon = select.value;
+            if (!name) {
+                alert('Ingresa un nombre para la categoría');
+                return;
+            }
+            const id = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+            if (categories.find(c => c.id === id)) {
+                alert('Ya existe una categoría con ese nombre');
+                return;
+            }
+            categories.push({ id, icon, nombre: name, items: [] });
+            data[id] = [];
+            saveData();
+            render();
+            input.value = '';
+            input.focus();
+        }
+
+        function handleAddCategoryKeydown(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('addCategoriaBtn').click();
+            }
+        }
+
+        // ============================================================
+        // HANDLERS - DRAG & DROP ITEMS
+        // ============================================================
+        function handleDragStart(e) {
+            if (!editMode) return;
+            const item = e.target.closest('.item');
+            if (!item) return;
+            const catId = item.dataset.categoriaId;
+            const index = parseInt(item.dataset.index);
+            dragData = { catId, index };
+            item.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', `${catId}|${index}`);
+            setTimeout(() => { item.style.opacity = '0.4'; }, 0);
+        }
+
+        function handleDragEnd(e) {
+            const item = e.target.closest('.item');
+            if (item) {
+                item.classList.remove('dragging');
+                item.style.opacity = '1';
+            }
+            document.querySelectorAll('.item.drag-over').forEach(el => el.classList.remove('drag-over'));
+            dragData = null;
+            dragOverData = null;
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            const targetItem = e.target.closest('.item');
+            if (!targetItem || !dragData) return;
+            const catId = targetItem.dataset.categoriaId;
+            const index = parseInt(targetItem.dataset.index);
+            if (catId === dragData.catId && index !== dragData.index) {
+                document.querySelectorAll('.item.drag-over').forEach(el => el.classList.remove('drag-over'));
+                targetItem.classList.add('
