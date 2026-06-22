@@ -1,1154 +1,453 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lista de Compras</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f5;
-            padding: 20px;
-            padding-bottom: 100px;
-            max-width: 800px;
-            margin: 0 auto;
-            min-height: 100vh;
-        }
-
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-            font-size: 28px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        .header-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            touch-action: manipulation;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .btn:active {
-            transform: scale(0.95);
-        }
-
-        .btn-reset {
-            background: #e74c3c;
-            color: white;
-        }
-
-        .btn-reset:hover {
-            background: #c0392b;
-        }
-
-        .btn-edit {
-            background: #3498db;
-            color: white;
-        }
-
-        .btn-edit:hover {
-            background: #2980b9;
-        }
-
-        .btn-edit.active {
-            background: #e67e22;
-        }
-
-        .btn-nueva-categoria {
-            background: #9b59b6;
-            color: white;
-            display: none;
-        }
-
-        .btn-nueva-categoria.show {
-            display: inline-block;
-        }
-
-        .btn-nueva-categoria:hover {
-            background: #8e44ad;
-        }
-
-        .add-categoria-top {
-            background: white;
-            border-radius: 16px;
-            padding: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            display: none;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-            border: 2px dashed #bdc3c7;
-        }
-
-        .add-categoria-top.show {
-            display: flex;
-        }
-
-        .add-categoria-top input {
-            flex: 1;
-            min-width: 150px;
-            padding: 10px 14px;
-            border: 2px solid #bdc3c7;
-            border-radius: 10px;
-            font-size: 15px;
-            outline: none;
-            transition: border-color 0.3s;
-            background: white;
-            font-family: inherit;
-        }
-
-        .add-categoria-top input:focus {
-            border-color: #3498db;
-        }
-
-        .add-categoria-top select {
-            padding: 10px 14px;
-            border: 2px solid #bdc3c7;
-            border-radius: 10px;
-            font-size: 15px;
-            outline: none;
-            background: white;
-            font-family: inherit;
-            cursor: pointer;
-            min-width: 120px;
-        }
-
-        .add-categoria-top select:focus {
-            border-color: #3498db;
-        }
-
-        .btn-add-categoria-top {
-            background: #2ecc71;
-            color: white;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            touch-action: manipulation;
-            white-space: nowrap;
-        }
-
-        .btn-add-categoria-top:active {
-            transform: scale(0.95);
-        }
-
-        .btn-add-categoria-top:hover {
-            background: #27ae60;
-        }
-
-        .categoria-wrapper {
-            transition: all 0.3s ease;
-        }
-
-        .categoria-wrapper.dragging-cat {
-            opacity: 0.3;
-            transform: scale(0.95);
-        }
-
-        .categoria-wrapper.drag-over-cat {
-            padding-top: 20px;
-            border-top: 4px solid #3498db;
-        }
-
-        .categoria {
-            background: white;
-            border-radius: 16px;
-            padding: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .categoria-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #ecf0f1;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .categoria-header:hover .categoria-titulo {
-            color: #3498db;
-        }
-
-        .categoria-header-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex: 1;
-            min-width: 0;
-        }
-
-        .cat-drag-handle {
-            color: #bdc3c7;
-            font-size: 20px;
-            cursor: grab;
-            display: none;
-            user-select: none;
-            padding: 4px;
-            touch-action: none;
-        }
-
-        .cat-drag-handle.show {
-            display: block;
-        }
-
-        .cat-drag-handle:active {
-            cursor: grabbing;
-        }
-
-        .categoria-titulo {
-            font-size: 20px;
-            font-weight: 700;
-            color: #2c3e50;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: color 0.2s;
-            flex: 1;
-        }
-
-        .categoria-titulo .emoji {
-            font-size: 24px;
-        }
-
-        .categoria-titulo .toggle-icon {
-            font-size: 14px;
-            color: #bdc3c7;
-            transition: transform 0.3s ease;
-            margin-left: 5px;
-        }
-
-        .categoria-titulo .toggle-icon.collapsed {
-            transform: rotate(-90deg);
-        }
-
-        .categoria-actions {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            flex-shrink: 0;
-        }
-
-        .add-item-btn {
-            background: #2ecc71;
-            color: white;
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            font-size: 22px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            touch-action: manipulation;
-        }
-
-        .add-item-btn.show {
-            display: flex;
-        }
-
-        .add-item-btn:active {
-            transform: scale(0.9);
-        }
-
-        .cat-delete-btn {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            font-size: 18px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            touch-action: manipulation;
-        }
-
-        .cat-delete-btn.show {
-            display: flex;
-        }
-
-        .cat-delete-btn:active {
-            transform: scale(0.9);
-        }
-
-        .items-container {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            max-height: 2000px;
-            opacity: 1;
-        }
-
-        .items-container.collapsed {
-            max-height: 0;
-            opacity: 0;
-            padding: 0;
-            margin: 0;
-            pointer-events: none;
-        }
-
-        .item {
-            display: flex;
-            align-items: center;
-            padding: 10px 8px;
-            border-radius: 10px;
-            margin-bottom: 4px;
-            transition: all 0.2s;
-            background: #fafafa;
-            gap: 12px;
-            touch-action: none;
-        }
-
-        .item.dragging {
-            opacity: 0.5;
-            background: #e8f4fd;
-        }
-
-        .item.drag-over {
-            border-top: 3px solid #3498db;
-            background: #ebf5fb;
-        }
-
-        .drag-handle {
-            color: #bdc3c7;
-            font-size: 18px;
-            cursor: grab;
-            display: none;
-            user-select: none;
-            padding: 4px;
-            touch-action: none;
-        }
-
-        .drag-handle.show {
-            display: block;
-        }
-
-        .drag-handle:active {
-            cursor: grabbing;
-        }
-
-        .item-checkbox {
-            width: 22px;
-            height: 22px;
-            min-width: 22px;
-            border-radius: 6px;
-            border: 2px solid #bdc3c7;
-            appearance: none;
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-            touch-action: manipulation;
-        }
-
-        .item-checkbox:checked {
-            background: #2ecc71;
-            border-color: #2ecc71;
-        }
-
-        .item-checkbox:checked::after {
-            content: '✓';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .item-text {
-            flex: 1;
-            font-size: 17px;
-            color: #2c3e50;
-            transition: all 0.3s;
-            word-break: break-word;
-        }
-
-        .item-text.checked {
-            text-decoration: line-through;
-            color: #95a5a6;
-        }
-
-        .item-delete {
-            color: #e74c3c;
-            font-size: 20px;
-            cursor: pointer;
-            display: none;
-            padding: 4px 8px;
-            border-radius: 6px;
-            transition: all 0.2s;
-            touch-action: manipulation;
-            font-weight: bold;
-            background: transparent;
-            border: none;
-        }
-
-        .item-delete.show {
-            display: block;
-        }
-
-        .item-delete:active {
-            background: #fee;
-            transform: scale(0.9);
-        }
-
-        .add-item-input-container {
-            display: none;
-            margin-top: 12px;
-            gap: 10px;
-            align-items: center;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .add-item-input-container.show {
-            display: flex;
-        }
-
-        .add-item-input {
-            flex: 1;
-            padding: 10px 15px;
-            border: 2px solid #bdc3c7;
-            border-radius: 10px;
-            font-size: 16px;
-            outline: none;
-            transition: border-color 0.3s;
-            background: white;
-        }
-
-        .add-item-input:focus {
-            border-color: #3498db;
-        }
-
-        .add-item-confirm {
-            background: #2ecc71;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            touch-action: manipulation;
-            white-space: nowrap;
-        }
-
-        .add-item-confirm:active {
-            transform: scale(0.95);
-        }
-
-        .item-count {
-            font-size: 14px;
-            color: #7f8c8d;
-            font-weight: 400;
-        }
-
-        .edit-mode .item-delete {
-            display: block !important;
-        }
-
-        .edit-mode .drag-handle {
-            display: block !important;
-        }
-
-        .edit-mode .add-item-btn {
-            display: flex !important;
-        }
-
-        .edit-mode .cat-drag-handle {
-            display: block !important;
-        }
-
-        .edit-mode .cat-delete-btn {
-            display: flex !important;
-        }
-
-        .edit-mode .btn-nueva-categoria {
-            display: inline-block !important;
-        }
-
-        /* En modo edición, el header no colapsa */
-        .edit-mode .categoria-header {
-            cursor: default;
-        }
-
-        .edit-mode .categoria-header:hover .categoria-titulo {
-            color: #2c3e50;
-        }
-
-        .edit-mode .categoria-titulo .toggle-icon {
-            display: none;
-        }
-
-        .empty-message {
-            text-align: center;
-            color: #bdc3c7;
-            padding: 20px;
-            font-size: 16px;
-        }
-
-        @media (max-width: 600px) {
-            body {
-                padding: 12px;
-                padding-bottom: 80px;
-            }
-
-            h1 {
-                font-size: 22px;
-            }
-
-            .btn {
-                padding: 10px 18px;
-                font-size: 14px;
-            }
-
-            .categoria {
-                padding: 12px;
-            }
-
-            .categoria-titulo {
-                font-size: 17px;
-            }
-
-            .item {
-                padding: 8px 6px;
-            }
-
-            .item-text {
-                font-size: 15px;
-            }
-
-            .item-checkbox {
-                width: 20px;
-                height: 20px;
-                min-width: 20px;
-            }
-
-            .drag-handle {
-                font-size: 16px;
-            }
-
-            .add-categoria-top {
-                padding: 12px;
-                flex-direction: column;
-            }
-
-            .add-categoria-top input,
-            .add-categoria-top select {
-                width: 100%;
-                min-width: unset;
-            }
-        }
-
-        .item:active {
-            background: #f0f0f0;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Lista de Compras</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f8f7ff;padding:20px;padding-bottom:100px;max-width:800px;margin:0 auto;min-height:100vh;color:#1a1730}
+:root{
+  --violet:#6c47ff;
+  --violet-light:#ede9ff;
+  --violet-mid:#c4b5fd;
+  --violet-dark:#4a2fcf;
+  --glass:rgba(255,255,255,0.7);
+  --glass-border:rgba(108,71,255,0.12);
+  --radius:16px;
+  --radius-sm:10px;
+  --shadow:0 2px 16px rgba(108,71,255,0.07);
+  --shadow-sm:0 1px 6px rgba(108,71,255,0.06);
+  --transition:all 0.25s cubic-bezier(.4,0,.2,1);
+}
+h1{text-align:center;color:#1a1730;font-size:26px;font-weight:600;margin-bottom:6px;letter-spacing:-0.3px;display:flex;align-items:center;justify-content:center;gap:10px}
+h1 .ti{font-size:22px;color:var(--violet)}
+.subtitle{text-align:center;color:#8b7faa;font-size:13px;margin-bottom:22px;font-weight:400}
+
+.header-buttons{display:flex;gap:8px;justify-content:center;margin-bottom:22px;flex-wrap:wrap}
+.btn{padding:9px 20px;border:1px solid rgba(108,71,255,0.18);border-radius:50px;font-size:14px;font-weight:500;cursor:pointer;transition:var(--transition);background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);color:#4a2fcf;display:flex;align-items:center;gap:6px;box-shadow:var(--shadow-sm)}
+.btn .ti{font-size:16px}
+.btn:hover{background:rgba(108,71,255,0.08);border-color:rgba(108,71,255,0.3);transform:translateY(-1px);box-shadow:0 4px 16px rgba(108,71,255,0.12)}
+.btn:active{transform:scale(0.97) translateY(0)}
+.btn-danger{color:#c0392b;border-color:rgba(192,57,43,0.18)}
+.btn-danger:hover{background:rgba(192,57,43,0.06);border-color:rgba(192,57,43,0.3)}
+.btn-edit.active{background:rgba(108,71,255,0.12);border-color:var(--violet);color:var(--violet)}
+.btn-nueva-categoria{display:none}
+.btn-nueva-categoria.show{display:flex}
+
+.add-categoria-top{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:14px;margin-bottom:18px;backdrop-filter:blur(12px);display:none;gap:10px;align-items:center;flex-wrap:wrap;box-shadow:var(--shadow)}
+.add-categoria-top.show{display:flex}
+.add-categoria-top input,.add-categoria-top select{flex:1;min-width:140px;padding:9px 14px;border:1px solid rgba(108,71,255,0.18);border-radius:var(--radius-sm);font-size:14px;outline:none;transition:var(--transition);background:rgba(255,255,255,0.8);font-family:inherit;color:#1a1730}
+.add-categoria-top input:focus,.add-categoria-top select:focus{border-color:var(--violet);box-shadow:0 0 0 3px rgba(108,71,255,0.1)}
+.btn-add-ok{background:var(--violet);color:#fff;border:none;padding:9px 20px;border-radius:50px;font-size:14px;font-weight:500;cursor:pointer;transition:var(--transition);white-space:nowrap;display:flex;align-items:center;gap:5px}
+.btn-add-ok .ti{font-size:15px}
+.btn-add-ok:hover{background:var(--violet-dark);transform:translateY(-1px)}
+.btn-add-ok:active{transform:scale(0.97)}
+
+.categoria-wrapper{transition:var(--transition)}
+.categoria-wrapper.dragging-cat{opacity:0.3;transform:scale(0.97)}
+.categoria-wrapper.drag-over-cat{padding-top:16px;border-top:2px solid var(--violet)}
+
+.categoria{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:16px;margin-bottom:14px;backdrop-filter:blur(12px);box-shadow:var(--shadow);transition:var(--transition)}
+.categoria:hover{box-shadow:0 4px 24px rgba(108,71,255,0.1)}
+
+.categoria-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid rgba(108,71,255,0.08);cursor:pointer;user-select:none}
+.edit-mode .categoria-header{cursor:default}
+.edit-mode .toggle-icon{display:none}
+.categoria-header-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.cat-drag-handle{color:#c4b5fd;font-size:18px;cursor:grab;display:none;user-select:none;touch-action:none}
+.cat-drag-handle.show,.edit-mode .cat-drag-handle{display:block}
+.cat-drag-handle:active{cursor:grabbing}
+
+.cat-icon{width:34px;height:34px;border-radius:10px;background:var(--violet-light);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cat-icon .ti{font-size:18px;color:var(--violet)}
+
+.categoria-titulo{font-size:16px;font-weight:600;color:#1a1730;display:flex;align-items:center;gap:8px;flex:1}
+.item-count-badge{background:var(--violet-light);color:var(--violet);font-size:11px;font-weight:600;padding:2px 8px;border-radius:50px;min-width:24px;text-align:center}
+.toggle-icon{font-size:14px;color:#c4b5fd;transition:transform 0.3s ease;margin-left:auto}
+.toggle-icon.collapsed{transform:rotate(-90deg)}
+
+.categoria-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.icon-btn{background:rgba(255,255,255,0.6);border:1px solid rgba(108,71,255,0.15);width:32px;height:32px;border-radius:50%;font-size:0;cursor:pointer;transition:var(--transition);display:none;align-items:center;justify-content:center;touch-action:manipulation;color:#6c47ff}
+.icon-btn .ti{font-size:16px}
+.icon-btn:hover{background:rgba(108,71,255,0.1);border-color:rgba(108,71,255,0.3);transform:scale(1.05)}
+.icon-btn:active{transform:scale(0.93)}
+.icon-btn.show,.edit-mode .icon-btn{display:flex}
+.icon-btn-danger{color:#c0392b;border-color:rgba(192,57,43,0.15)}
+.icon-btn-danger:hover{background:rgba(192,57,43,0.07);border-color:rgba(192,57,43,0.3)}
+
+.items-container{display:flex;flex-direction:column;gap:2px;overflow:hidden;transition:max-height 0.35s cubic-bezier(.4,0,.2,1),opacity 0.25s ease;max-height:3000px;opacity:1}
+.items-container.collapsed{max-height:0;opacity:0;pointer-events:none}
+
+.item{display:flex;align-items:center;padding:9px 8px;border-radius:10px;margin-bottom:2px;transition:var(--transition);gap:10px;touch-action:none}
+.item:hover{background:rgba(108,71,255,0.04)}
+.item.dragging{opacity:0.4;background:var(--violet-light)}
+.item.drag-over{border-top:2px solid var(--violet);background:rgba(108,71,255,0.05)}
+
+.drag-handle{color:#c4b5fd;font-size:16px;cursor:grab;display:none;user-select:none;touch-action:none}
+.drag-handle.show,.edit-mode .drag-handle{display:block}
+.drag-handle:active{cursor:grabbing}
+
+.item-checkbox{width:20px;height:20px;min-width:20px;border-radius:6px;border:1.5px solid #c4b5fd;appearance:none;cursor:pointer;transition:var(--transition);position:relative;touch-action:manipulation;background:rgba(255,255,255,0.7)}
+.item-checkbox:checked{background:var(--violet);border-color:var(--violet)}
+.item-checkbox:checked::after{content:'';position:absolute;top:3px;left:6px;width:5px;height:9px;border:2px solid #fff;border-top:none;border-left:none;transform:rotate(45deg)}
+.item-checkbox:hover:not(:checked){border-color:var(--violet);background:var(--violet-light)}
+
+.item-text{flex:1;font-size:15px;color:#2d2250;transition:var(--transition);word-break:break-word;line-height:1.4}
+.item-text.checked{text-decoration:line-through;color:#b0a8c8}
+
+.item-delete{color:#b0a8c8;font-size:0;cursor:pointer;display:none;padding:4px;border-radius:6px;transition:var(--transition);touch-action:manipulation;background:transparent;border:none}
+.item-delete .ti{font-size:15px}
+.item-delete:hover{color:#c0392b;background:rgba(192,57,43,0.07)}
+.item-delete.show,.edit-mode .item-delete{display:flex;align-items:center}
+.item-delete:active{transform:scale(0.9)}
+
+.add-item-input-container{display:none;margin-top:10px;gap:8px;align-items:center;transition:var(--transition)}
+.add-item-input-container.show{display:flex}
+.add-item-input{flex:1;padding:9px 14px;border:1px solid rgba(108,71,255,0.18);border-radius:var(--radius-sm);font-size:14px;outline:none;transition:var(--transition);background:rgba(255,255,255,0.8);color:#1a1730}
+.add-item-input:focus{border-color:var(--violet);box-shadow:0 0 0 3px rgba(108,71,255,0.1)}
+.add-item-confirm{background:var(--violet);color:#fff;border:none;padding:9px 18px;border-radius:50px;font-size:14px;font-weight:500;cursor:pointer;transition:var(--transition);white-space:nowrap}
+.add-item-confirm:hover{background:var(--violet-dark)}
+.add-item-confirm:active{transform:scale(0.97)}
+.empty-message{text-align:center;color:#c4b5fd;padding:16px;font-size:14px}
+
+@media(max-width:600px){
+  body{padding:12px;padding-bottom:80px}
+  h1{font-size:20px}
+  .btn{padding:8px 15px;font-size:13px}
+  .categoria{padding:12px}
+  .item-text{font-size:14px}
+  .add-categoria-top{flex-direction:column}
+  .add-categoria-top input,.add-categoria-top select{width:100%;min-width:unset}
+}
+</style>
 </head>
 <body>
-    <h1>
-        🛒 Lista de Compras
-        <span class="item-count" id="totalItems">0 items</span>
-    </h1>
 
-    <div class="header-buttons">
-        <button class="btn btn-reset" id="resetBtn">🔄 Reiniciar</button>
-        <button class="btn btn-edit" id="editBtn">✏️ Editar</button>
-        <button class="btn btn-nueva-categoria" id="btnNuevaCategoria">➕ Nueva Categoría</button>
-    </div>
+<h1><i class="ti ti-shopping-cart" aria-hidden="true"></i> Lista de Compras</h1>
+<p class="subtitle" id="totalItems">0 productos</p>
 
-    <div class="add-categoria-top" id="addCategoriaTop">
-        <input type="text" id="addCategoriaInput" placeholder="Nombre de la categoría...">
-        <select id="addCategoriaIcon">
-            <option value="🛒">🛒 General</option>
-            <option value="🥬">🥬 Verduras</option>
-            <option value="🧀">🧀 Lácteos</option>
-            <option value="🥫">🥫 Almacén</option>
-            <option value="🍞">🍞 Panadería</option>
-            <option value="🥩">🥩 Carnes</option>
-            <option value="❄️">❄️ Congelados</option>
-            <option value="☕">☕ Desayuno</option>
-            <option value="🧹">🧹 Limpieza</option>
-            <option value="🧴">🧴 Higiene</option>
-            <option value="🥤">🥤 Bebidas</option>
-            <option value="🍕">🍕 Comida</option>
-            <option value="🧁">🧁 Dulces</option>
-            <option value="🌿">🌿 Salud</option>
-        </select>
-        <button class="btn-add-categoria-top" id="addCategoriaBtn">✅ Agregar</button>
-        <button class="btn btn-reset" id="cancelCategoriaBtn" style="padding:10px 18px;font-size:14px;">✖ Cancelar</button>
-    </div>
+<div class="header-buttons">
+  <button class="btn btn-danger" id="resetBtn"><i class="ti ti-refresh"></i> Reiniciar</button>
+  <button class="btn btn-edit" id="editBtn"><i class="ti ti-pencil"></i> Editar</button>
+  <button class="btn btn-nueva-categoria" id="btnNuevaCategoria"><i class="ti ti-folder-plus"></i> Nueva sección</button>
+</div>
 
-    <div id="listaContainer"></div>
+<div class="add-categoria-top" id="addCategoriaTop">
+  <input type="text" id="addCategoriaInput" placeholder="Nombre de la categoría...">
+  <select id="addCategoriaIcon">
+    <option value="ti-shopping-cart">🛒 General</option>
+    <option value="ti-leaf">🥬 Verduras</option>
+    <option value="ti-cheese">🧀 Lácteos</option>
+    <option value="ti-building-store">🥫 Almacén</option>
+    <option value="ti-bread">🍞 Panadería</option>
+    <option value="ti-meat">🥩 Carnes</option>
+    <option value="ti-snowflake">❄️ Congelados</option>
+    <option value="ti-coffee">☕ Desayuno</option>
+    <option value="ti-tool">🧹 Limpieza</option>
+    <option value="ti-heart">🧴 Higiene</option>
+    <option value="ti-bottle">🥤 Bebidas</option>
+    <option value="ti-pizza">🍕 Comida</option>
+    <option value="ti-candy">🧁 Dulces</option>
+    <option value="ti-leaf2">🌿 Salud</option>
+  </select>
+  <button class="btn-add-ok" id="addCategoriaBtn"><i class="ti ti-check"></i> Agregar</button>
+  <button class="btn btn-danger" id="cancelCategoriaBtn" style="padding:9px 15px"><i class="ti ti-x"></i></button>
+</div>
 
-    <script>
-        const categoriasData = [
-            { id: 'verduleria', emoji: '🥬', nombre: 'Verdulería', items: ['Bananas', 'Manzanas', 'Naranjas', 'Limones', 'Tomates', 'Lechuga', 'Zanahorias', 'Cebollas', 'Papas', 'Batatas', 'Palta'] },
-            { id: 'lacteos', emoji: '🧀', nombre: 'Lácteos', items: ['Leche', 'Yogur', 'Queso cremoso', 'Queso rallado', 'Manteca', 'Huevos'] },
-            { id: 'almacen', emoji: '🥫', nombre: 'Almacén', items: ['Arroz', 'Fideos', 'Puré de tomate', 'Atún', 'Lentejas', 'Garbanzos', 'Aceite', 'Vinagre', 'Sal', 'Azúcar', 'Harina', 'Pan rallado'] },
-            { id: 'panaderia', emoji: '🍞', nombre: 'Panadería', items: ['Pan de molde', 'Pan francés', 'Tostadas'] },
-            { id: 'carnes', emoji: '🥩', nombre: 'Carnes', items: ['Pollo', 'Carne picada', 'Milanesas', 'Pescado'] },
-            { id: 'congelados', emoji: '❄️', nombre: 'Congelados', items: ['Verduras congeladas', 'Hamburguesas', 'Helado'] },
-            { id: 'desayuno', emoji: '☕', nombre: 'Desayuno y merienda', items: ['Café', 'Té', 'Galletitas', 'Mermelada', 'Dulce de leche', 'Cereales'] },
-            { id: 'limpieza', emoji: '🧹', nombre: 'Limpieza', items: ['Detergente', 'Esponja', 'Lavandina', 'Limpiador de pisos', 'Bolsas de residuos', 'Papel de cocina'] },
-            { id: 'higiene', emoji: '🧴', nombre: 'Higiene personal', items: ['Papel higiénico', 'Shampoo', 'Acondicionador', 'Jabón', 'Pasta dental', 'Desodorante'] },
-            { id: 'bebidas', emoji: '🥤', nombre: 'Bebidas', items: ['Agua', 'Gaseosas', 'Jugo', 'Cerveza', 'Vino'] }
-        ];
+<div id="listaContainer"></div>
 
-        let categories = [];
-        let data = {};
-        let editMode = false;
-        let dragData = null;
-        let dragOverData = null;
-        let catDragData = null;
-        let catDragOverData = null;
-        let collapsedCategories = {};
+<script>
+const CAT_ICONS={
+  verduleria:'ti-leaf',lacteos:'ti-cheese',almacen:'ti-building-store',
+  panaderia:'ti-bread',carnes:'ti-meat',congelados:'ti-snowflake',
+  desayuno:'ti-coffee',limpieza:'ti-tool',higiene:'ti-heart',
+  bebidas:'ti-bottle'
+};
 
-        function loadData() {
-            const saved = localStorage.getItem('listaComprasPro');
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    if (parsed.categories && parsed.data) {
-                        categories = parsed.categories;
-                        data = parsed.data;
-                        collapsedCategories = parsed.collapsedCategories || {};
-                        categories.forEach(cat => {
-                            if (!data[cat.id]) {
-                                data[cat.id] = cat.items.map(item => ({ text: item, checked: false }));
-                            } else {
-                                const existingTexts = data[cat.id].map(i => i.text);
-                                cat.items.forEach(item => {
-                                    if (!existingTexts.includes(item)) {
-                                        data[cat.id].push({ text: item, checked: false });
-                                    }
-                                });
-                            }
-                        });
-                        saveData();
-                        return;
-                    }
-                } catch (e) { console.warn('Error al cargar datos'); }
-            }
-            categories = JSON.parse(JSON.stringify(categoriasData));
-            data = {};
-            collapsedCategories = {};
-            categories.forEach(cat => {
-                data[cat.id] = cat.items.map(item => ({ text: item, checked: false }));
-            });
-            saveData();
+const categoriasData=[
+  {id:'verduleria',icon:'ti-leaf',nombre:'Verdulería',items:['Bananas','Manzanas','Naranjas','Limones','Tomates','Lechuga','Zanahorias','Cebollas','Papas','Batatas','Palta']},
+  {id:'lacteos',icon:'ti-cheese',nombre:'Lácteos',items:['Leche','Yogur','Queso cremoso','Queso rallado','Manteca','Huevos']},
+  {id:'almacen',icon:'ti-building-store',nombre:'Almacén',items:['Arroz','Fideos','Puré de tomate','Atún','Lentejas','Garbanzos','Aceite','Vinagre','Sal','Azúcar','Harina','Pan rallado']},
+  {id:'panaderia',icon:'ti-bread',nombre:'Panadería',items:['Pan de molde','Pan francés','Tostadas']},
+  {id:'carnes',icon:'ti-meat',nombre:'Carnes',items:['Pollo','Carne picada','Milanesas','Pescado']},
+  {id:'congelados',icon:'ti-snowflake',nombre:'Congelados',items:['Verduras congeladas','Hamburguesas','Helado']},
+  {id:'desayuno',icon:'ti-coffee',nombre:'Desayuno y merienda',items:['Café','Té','Galletitas','Mermelada','Dulce de leche','Cereales']},
+  {id:'limpieza',icon:'ti-tool',nombre:'Limpieza',items:['Detergente','Esponja','Lavandina','Limpiador de pisos','Bolsas de residuos','Papel de cocina']},
+  {id:'higiene',icon:'ti-heart',nombre:'Higiene personal',items:['Papel higiénico','Shampoo','Acondicionador','Jabón','Pasta dental','Desodorante']},
+  {id:'bebidas',icon:'ti-bottle',nombre:'Bebidas',items:['Agua','Gaseosas','Jugo','Cerveza','Vino']}
+];
+
+let categories=[],data={},editMode=false,dragData=null,dragOverData=null,catDragData=null,catDragOverData=null,collapsedCategories={};
+
+function loadData(){
+  const saved=localStorage.getItem('listaComprasV2');
+  if(saved){
+    try{
+      const p=JSON.parse(saved);
+      if(p.categories&&p.data){
+        categories=p.categories;
+        data=p.data;
+        collapsedCategories=p.collapsedCategories||{};
+        categories.forEach(cat=>{
+          if(!cat.icon)cat.icon=CAT_ICONS[cat.id]||'ti-shopping-cart';
+          if(!data[cat.id])data[cat.id]=cat.items.map(i=>({text:i,checked:false}));
+        });
+        saveData();return;
+      }
+    }catch(e){}
+  }
+  categories=JSON.parse(JSON.stringify(categoriasData));
+  data={};collapsedCategories={};
+  categories.forEach(cat=>{data[cat.id]=cat.items.map(i=>({text:i,checked:false}));});
+  saveData();
+}
+
+function saveData(){
+  localStorage.setItem('listaComprasV2',JSON.stringify({categories,data,collapsedCategories}));
+  updateCount();
+}
+
+function updateCount(){
+  let total=0,checked=0;
+  Object.values(data).forEach(items=>{total+=items.length;checked+=items.filter(i=>i.checked).length;});
+  document.getElementById('totalItems').textContent=checked>0?`${checked} de ${total} productos`:`${total} productos`;
+}
+
+function toggleCategory(catId){
+  if(editMode)return;
+  collapsedCategories[catId]=!collapsedCategories[catId];
+  saveData();render();
+}
+
+function render(){
+  const container=document.getElementById('listaContainer');
+  container.innerHTML='';
+  categories.forEach(cat=>{
+    const items=data[cat.id]||[];
+    const isCollapsed=collapsedCategories[cat.id]||false;
+    const iconClass=cat.icon||'ti-shopping-cart';
+    const wrapper=document.createElement('div');
+    wrapper.className='categoria-wrapper';
+    wrapper.dataset.categoriaId=cat.id;
+    wrapper.draggable=editMode;
+    const div=document.createElement('div');
+    div.className='categoria'+(editMode?' edit-mode':'');
+    div.innerHTML=`
+<div class="categoria-header" data-categoria-id="${cat.id}">
+  <div class="categoria-header-left">
+    <span class="cat-drag-handle ${editMode?'show':''}" aria-hidden="true"><i class="ti ti-grip-vertical"></i></span>
+    <div class="cat-icon" aria-hidden="true"><i class="ti ${iconClass}"></i></div>
+    <span class="categoria-titulo">
+      ${cat.nombre}
+      <span class="item-count-badge">${items.length}</span>
+    </span>
+  </div>
+  <div class="categoria-actions">
+    <button class="icon-btn ${editMode?'show':''}" data-categoria="${cat.id}" title="Agregar item" aria-label="Agregar item"><i class="ti ti-plus"></i></button>
+    <button class="icon-btn icon-btn-danger ${editMode?'show':''}" data-action="cat-delete" data-categoria="${cat.id}" title="Eliminar categoría" aria-label="Eliminar categoría"><i class="ti ti-trash"></i></button>
+    <i class="ti ti-chevron-down toggle-icon ${isCollapsed?'collapsed':''}" aria-hidden="true"></i>
+  </div>
+</div>
+<div class="items-container ${isCollapsed?'collapsed':''}" data-categoria-id="${cat.id}">
+  ${items.length===0?'<div class="empty-message">Sin productos aún</div>':''}
+  ${items.map((item,index)=>`
+    <div class="item" data-categoria="${cat.id}" data-index="${index}" draggable="${editMode}">
+      <span class="drag-handle ${editMode?'show':''}" aria-hidden="true"><i class="ti ti-grip-vertical"></i></span>
+      <input type="checkbox" class="item-checkbox" ${item.checked?'checked':''} data-categoria="${cat.id}" data-index="${index}" aria-label="${item.text}">
+      <span class="item-text ${item.checked?'checked':''}">${item.text}</span>
+      <button class="item-delete ${editMode?'show':''}" data-categoria="${cat.id}" data-index="${index}" aria-label="Eliminar ${item.text}"><i class="ti ti-x"></i></button>
+    </div>`).join('')}
+</div>
+<div class="add-item-input-container ${editMode?'show':''}" data-categoria="${cat.id}">
+  <input type="text" class="add-item-input" placeholder="Agregar producto...">
+  <button class="add-item-confirm" data-categoria="${cat.id}">Agregar</button>
+</div>`;
+    wrapper.appendChild(div);
+    container.appendChild(wrapper);
+  });
+  document.getElementById('btnNuevaCategoria').classList.toggle('show',editMode);
+  if(!editMode)document.getElementById('addCategoriaTop').classList.remove('show');
+  attachEvents();
+  updateCount();
+}
+
+function attachEvents(){
+  document.querySelectorAll('.categoria-header').forEach(h=>{
+    h.onclick=e=>{
+      if(editMode)return;
+      if(e.target.closest('.categoria-actions'))return;
+      toggleCategory(h.dataset.categoriaId);
+    };
+  });
+  document.querySelectorAll('.item-checkbox').forEach(cb=>{
+    cb.onchange=e=>{
+      const cat=e.target.dataset.categoria,index=parseInt(e.target.dataset.index);
+      if(data[cat]&&data[cat][index]){
+        data[cat][index].checked=e.target.checked;
+        saveData();
+        const span=e.target.closest('.item').querySelector('.item-text');
+        if(span)span.classList.toggle('checked',e.target.checked);
+        updateCount();
+      }
+    };
+  });
+  document.querySelectorAll('.item-delete').forEach(btn=>{
+    btn.onclick=e=>{
+      if(!editMode)return;
+      e.stopPropagation();
+      const cat=btn.dataset.categoria,index=parseInt(btn.dataset.index);
+      if(data[cat]){data[cat].splice(index,1);saveData();render();}
+    };
+  });
+  document.querySelectorAll('.icon-btn[data-categoria]').forEach(btn=>{
+    if(btn.dataset.action==='cat-delete'){
+      btn.onclick=e=>{
+        if(!editMode)return;
+        e.stopPropagation();
+        const catId=btn.dataset.categoria;
+        if(categories.length<=1){alert('Debe haber al menos una categoría');return;}
+        if(confirm(`¿Eliminar "${categories.find(c=>c.id===catId)?.nombre}"?`)){
+          const idx=categories.findIndex(c=>c.id===catId);
+          if(idx!==-1){categories.splice(idx,1);delete data[catId];delete collapsedCategories[catId];saveData();render();}
         }
+      };
+    } else {
+      btn.onclick=e=>{
+        e.stopPropagation();
+        const cat=btn.dataset.categoria;
+        const catDiv=btn.closest('.categoria');
+        const cont=catDiv.querySelector('.add-item-input-container');
+        const inp=cont.querySelector('.add-item-input');
+        cont.classList.toggle('show');
+        if(cont.classList.contains('show'))setTimeout(()=>inp.focus(),50);
+      };
+    }
+  });
+  document.querySelectorAll('.add-item-confirm').forEach(btn=>{
+    btn.onclick=e=>{
+      e.stopPropagation();
+      const cat=btn.dataset.categoria;
+      const catDiv=btn.closest('.categoria');
+      const inp=catDiv.querySelector('.add-item-input');
+      const text=inp.value.trim();
+      if(text&&data[cat]){
+        data[cat].push({text,checked:false});
+        saveData();render();
+        setTimeout(()=>{
+          const c=document.querySelector(`[data-categoria-id="${cat}"]`);
+          if(c){const ni=c.closest('.categoria')?.querySelector('.add-item-input');if(ni){ni.value='';ni.focus();}}
+        },50);
+      }
+    };
+  });
+  document.querySelectorAll('.add-item-input').forEach(inp=>{
+    inp.onkeydown=e=>{if(e.key==='Enter')inp.closest('.categoria').querySelector('.add-item-confirm').click();};
+  });
+  if(editMode){
+    document.querySelectorAll('.item').forEach(item=>{
+      item.ondragstart=e=>{
+        if(!editMode)return;
+        const cat=item.dataset.categoria,index=parseInt(item.dataset.index);
+        dragData={cat,index};item.classList.add('dragging');
+        e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',`${cat}|${index}`);
+        setTimeout(()=>item.style.opacity='0.4',0);
+      };
+      item.ondragend=e=>{
+        item.classList.remove('dragging');item.style.opacity='1';
+        document.querySelectorAll('.item.drag-over').forEach(el=>el.classList.remove('drag-over'));
+        dragData=null;dragOverData=null;
+      };
+      item.ondragover=e=>{
+        e.preventDefault();e.dataTransfer.dropEffect='move';
+        const cat=item.dataset.categoria,index=parseInt(item.dataset.index);
+        if(!dragData||cat!==dragData.cat||index===dragData.index)return;
+        document.querySelectorAll('.item.drag-over').forEach(el=>el.classList.remove('drag-over'));
+        item.classList.add('drag-over');dragOverData={cat,index};
+      };
+      item.ondragleave=()=>item.classList.remove('drag-over');
+      item.ondrop=e=>{
+        e.preventDefault();
+        if(!dragData||!dragOverData||dragData.cat!==dragOverData.cat||dragData.index===dragOverData.index)return;
+        const [moved]=data[dragData.cat].splice(dragData.index,1);
+        data[dragData.cat].splice(dragOverData.index,0,moved);
+        saveData();render();dragData=null;dragOverData=null;
+      };
+    });
+    document.querySelectorAll('.categoria-wrapper').forEach(w=>{
+      w.ondragstart=e=>{
+        if(!editMode)return;
+        if(e.target.closest('.item'))return;
+        const catId=w.dataset.categoriaId;
+        catDragData={catId};w.classList.add('dragging-cat');
+        e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',catId);
+        setTimeout(()=>w.style.opacity='0.4',0);
+      };
+      w.ondragend=()=>{
+        w.classList.remove('dragging-cat');w.style.opacity='1';
+        document.querySelectorAll('.categoria-wrapper.drag-over-cat').forEach(el=>el.classList.remove('drag-over-cat'));
+        catDragData=null;catDragOverData=null;
+      };
+      w.ondragover=e=>{
+        e.preventDefault();e.dataTransfer.dropEffect='move';
+        const catId=w.dataset.categoriaId;
+        if(!catDragData||catId===catDragData.catId)return;
+        document.querySelectorAll('.categoria-wrapper.drag-over-cat').forEach(el=>el.classList.remove('drag-over-cat'));
+        w.classList.add('drag-over-cat');catDragOverData={catId};
+      };
+      w.ondragleave=()=>w.classList.remove('drag-over-cat');
+      w.ondrop=e=>{
+        e.preventDefault();
+        if(!catDragData||!catDragOverData||catDragData.catId===catDragOverData.catId)return;
+        const from=categories.findIndex(c=>c.id===catDragData.catId);
+        const to=categories.findIndex(c=>c.id===catDragOverData.catId);
+        if(from!==-1&&to!==-1){const[moved]=categories.splice(from,1);categories.splice(to,0,moved);saveData();render();}
+        catDragData=null;catDragOverData=null;
+      };
+    });
+  }
+  document.getElementById('resetBtn').onclick=()=>{
+    if(confirm('¿Desmarcar todos los productos?')){
+      Object.keys(data).forEach(cat=>data[cat].forEach(i=>{i.checked=false;}));
+      saveData();render();
+    }
+  };
+  document.getElementById('editBtn').onclick=()=>{
+    editMode=!editMode;
+    const btn=document.getElementById('editBtn');
+    btn.innerHTML=editMode?'<i class="ti ti-check"></i> Listo':'<i class="ti ti-pencil"></i> Editar';
+    btn.classList.toggle('active',editMode);
+    if(!editMode)document.getElementById('addCategoriaTop').classList.remove('show');
+    render();
+  };
+  document.getElementById('btnNuevaCategoria').onclick=()=>{
+    const c=document.getElementById('addCategoriaTop');
+    c.classList.toggle('show');
+    if(c.classList.contains('show'))setTimeout(()=>document.getElementById('addCategoriaInput').focus(),50);
+  };
+  document.getElementById('cancelCategoriaBtn').onclick=()=>{
+    document.getElementById('addCategoriaTop').classList.remove('show');
+    document.getElementById('addCategoriaInput').value='';
+  };
+  document.getElementById('addCategoriaBtn').onclick=()=>{
+    const inp=document.getElementById('addCategoriaInput');
+    const sel=document.getElementById('addCategoriaIcon');
+    const name=inp.value.trim();
+    if(!name){alert('Ingresá un nombre para la categoría');return;}
+    const id=name.toLowerCase().replace(/[^a-z0-9]/g,'_')+Date.now();
+    categories.push({id,icon:sel.value,nombre:name,items:[]});
+    data[id]=[];collapsedCategories[id]=false;
+    saveData();render();inp.value='';
+    document.getElementById('addCategoriaTop').classList.remove('show');
+  };
+  document.getElementById('addCategoriaInput').onkeydown=e=>{
+    if(e.key==='Enter')document.getElementById('addCategoriaBtn').click();
+    if(e.key==='Escape')document.getElementById('cancelCategoriaBtn').click();
+  };
+}
 
-        function saveData() {
-            localStorage.setItem('listaComprasPro', JSON.stringify({ categories, data, collapsedCategories }));
-            updateTotalCount();
-        }
-
-        function updateTotalCount() {
-            let total = 0;
-            Object.values(data).forEach(items => { total += items.length; });
-            document.getElementById('totalItems').textContent = total + ' items';
-        }
-
-        function getCategoryName(catId) {
-            const cat = categories.find(c => c.id === catId);
-            return cat ? cat.nombre : catId;
-        }
-
-        function toggleCategory(catId) {
-            if (editMode) return;
-            collapsedCategories[catId] = !collapsedCategories[catId];
-            saveData();
-            render();
-        }
-
-        function render() {
-            const container = document.getElementById('listaContainer');
-            container.innerHTML = '';
-
-            categories.forEach((cat) => {
-                const items = data[cat.id] || [];
-                const isCollapsed = collapsedCategories[cat.id] || false;
-
-                const wrapper = document.createElement('div');
-                wrapper.className = 'categoria-wrapper';
-                wrapper.dataset.categoriaId = cat.id;
-                wrapper.draggable = editMode;
-
-                const div = document.createElement('div');
-                div.className = 'categoria';
-                if (editMode) div.classList.add('edit-mode');
-
-                div.innerHTML = `
-                    <div class="categoria-header" data-categoria-id="${cat.id}">
-                        <div class="categoria-header-left">
-                            <span class="cat-drag-handle ${editMode ? 'show' : ''}">⠿</span>
-                            <span class="categoria-titulo">
-                                <span class="emoji">${cat.emoji}</span>
-                                ${cat.nombre}
-                                <span class="item-count">(${items.length})</span>
-                                <span class="toggle-icon ${isCollapsed ? 'collapsed' : ''}">▼</span>
-                            </span>
-                        </div>
-                        <div class="categoria-actions">
-                            <button class="add-item-btn ${editMode ? 'show' : ''}" data-categoria="${cat.id}">+</button>
-                            <button class="cat-delete-btn ${editMode ? 'show' : ''}" data-categoria="${cat.id}">✕</button>
-                        </div>
-                    </div>
-                    <div class="items-container ${isCollapsed ? 'collapsed' : ''}" data-categoria-id="${cat.id}">
-                        ${items.length === 0 ? '<div class="empty-message">Sin items</div>' : ''}
-                        ${items.map((item, index) => `
-                            <div class="item" data-categoria="${cat.id}" data-index="${index}" draggable="${editMode}">
-                                <span class="drag-handle ${editMode ? 'show' : ''}">⠿</span>
-                                <input type="checkbox" class="item-checkbox" ${item.checked ? 'checked' : ''} data-categoria="${cat.id}" data-index="${index}">
-                                <span class="item-text ${item.checked ? 'checked' : ''}">${item.text}</span>
-                                <span class="item-delete ${editMode ? 'show' : ''}" data-categoria="${cat.id}" data-index="${index}">✕</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div class="add-item-input-container ${editMode ? 'show' : ''}" data-categoria="${cat.id}">
-                        <input type="text" class="add-item-input" placeholder="Nuevo item...">
-                        <button class="add-item-confirm" data-categoria="${cat.id}">Agregar</button>
-                    </div>
-                `;
-
-                wrapper.appendChild(div);
-                container.appendChild(wrapper);
-            });
-
-            const btnNueva = document.getElementById('btnNuevaCategoria');
-            if (editMode) {
-                btnNueva.classList.add('show');
-            } else {
-                btnNueva.classList.remove('show');
-                document.getElementById('addCategoriaTop').classList.remove('show');
-            }
-
-            attachEvents();
-            updateTotalCount();
-        }
-
-        function attachEvents() {
-            // Click en header para colapsar (solo si no está en modo edición)
-            document.querySelectorAll('.categoria-header').forEach(header => {
-                header.removeEventListener('click', handleHeaderClick);
-                header.addEventListener('click', handleHeaderClick);
-            });
-
-            document.querySelectorAll('.item-checkbox').forEach(cb => {
-                cb.removeEventListener('change', handleCheckboxChange);
-                cb.addEventListener('change', handleCheckboxChange);
-            });
-
-            document.querySelectorAll('.item-delete').forEach(btn => {
-                btn.removeEventListener('click', handleDelete);
-                btn.addEventListener('click', handleDelete);
-            });
-
-            document.querySelectorAll('.add-item-btn').forEach(btn => {
-                btn.removeEventListener('click', handleAddBtnClick);
-                btn.addEventListener('click', handleAddBtnClick);
-            });
-
-            document.querySelectorAll('.add-item-confirm').forEach(btn => {
-                btn.removeEventListener('click', handleAddConfirm);
-                btn.addEventListener('click', handleAddConfirm);
-            });
-
-            document.querySelectorAll('.add-item-input').forEach(input => {
-                input.removeEventListener('keydown', handleAddInputKeydown);
-                input.addEventListener('keydown', handleAddInputKeydown);
-            });
-
-            document.querySelectorAll('.cat-delete-btn').forEach(btn => {
-                btn.removeEventListener('click', handleCategoryDelete);
-                btn.addEventListener('click', handleCategoryDelete);
-            });
-
-            if (editMode) {
-                document.querySelectorAll('.item').forEach(item => {
-                    item.removeEventListener('dragstart', handleDragStart);
-                    item.removeEventListener('dragend', handleDragEnd);
-                    item.removeEventListener('dragover', handleDragOver);
-                    item.removeEventListener('dragleave', handleDragLeave);
-                    item.removeEventListener('drop', handleDrop);
-                    item.addEventListener('dragstart', handleDragStart);
-                    item.addEventListener('dragend', handleDragEnd);
-                    item.addEventListener('dragover', handleDragOver);
-                    item.addEventListener('dragleave', handleDragLeave);
-                    item.addEventListener('drop', handleDrop);
-                });
-
-                document.querySelectorAll('.categoria-wrapper').forEach(wrapper => {
-                    wrapper.removeEventListener('dragstart', handleCatDragStart);
-                    wrapper.removeEventListener('dragend', handleCatDragEnd);
-                    wrapper.removeEventListener('dragover', handleCatDragOver);
-                    wrapper.removeEventListener('dragleave', handleCatDragLeave);
-                    wrapper.removeEventListener('drop', handleCatDrop);
-                    wrapper.addEventListener('dragstart', handleCatDragStart);
-                    wrapper.addEventListener('dragend', handleCatDragEnd);
-                    wrapper.addEventListener('dragover', handleCatDragOver);
-                    wrapper.addEventListener('dragleave', handleCatDragLeave);
-                    wrapper.addEventListener('drop', handleCatDrop);
-                });
-            }
-
-            document.getElementById('resetBtn').removeEventListener('click', handleReset);
-            document.getElementById('resetBtn').addEventListener('click', handleReset);
-
-            document.getElementById('editBtn').removeEventListener('click', handleEditToggle);
-            document.getElementById('editBtn').addEventListener('click', handleEditToggle);
-
-            document.getElementById('btnNuevaCategoria').removeEventListener('click', handleNuevaCategoriaClick);
-            document.getElementById('btnNuevaCategoria').addEventListener('click', handleNuevaCategoriaClick);
-
-            document.getElementById('addCategoriaBtn').removeEventListener('click', handleAddCategory);
-            document.getElementById('addCategoriaBtn').addEventListener('click', handleAddCategory);
-
-            document.getElementById('cancelCategoriaBtn').removeEventListener('click', handleCancelCategoria);
-            document.getElementById('cancelCategoriaBtn').addEventListener('click', handleCancelCategoria);
-
-            document.getElementById('addCategoriaInput').removeEventListener('keydown', handleAddCategoryKeydown);
-            document.getElementById('addCategoriaInput').addEventListener('keydown', handleAddCategoryKeydown);
-        }
-
-        function handleHeaderClick(e) {
-            if (editMode) return;
-            const header = e.target.closest('.categoria-header');
-            if (!header) return;
-            // Si el click fue en un botón dentro del header, no colapsar
-            if (e.target.closest('.categoria-actions')) return;
-            const catId = header.dataset.categoriaId;
-            toggleCategory(catId);
-        }
-
-        function handleCheckboxChange(e) {
-            const cat = e.target.dataset.categoria;
-            const index = parseInt(e.target.dataset.index);
-            if (data[cat] && data[cat][index]) {
-                data[cat][index].checked = e.target.checked;
-                saveData();
-                const textSpan = e.target.closest('.item').querySelector('.item-text');
-                if (textSpan) {
-                    textSpan.classList.toggle('checked', e.target.checked);
-                }
-                updateTotalCount();
-            }
-        }
-
-        function handleDelete(e) {
-            if (!editMode) return;
-            e.stopPropagation();
-            const cat = e.target.dataset.categoria;
-            const index = parseInt(e.target.dataset.index);
-            if (data[cat]) {
-                data[cat].splice(index, 1);
-                saveData();
-                render();
-            }
-        }
-
-        function handleAddBtnClick(e) {
-            e.stopPropagation();
-            const cat = e.target.dataset.categoria;
-            const container = e.target.closest('.categoria');
-            const inputContainer = container.querySelector('.add-item-input-container');
-            const input = inputContainer.querySelector('.add-item-input');
-            inputContainer.classList.toggle('show');
-            if (inputContainer.classList.contains('show')) {
-                input.focus();
-            }
-        }
-
-        function handleAddConfirm(e) {
-            e.stopPropagation();
-            const cat = e.target.dataset.categoria;
-            const container = e.target.closest('.categoria');
-            const input = container.querySelector('.add-item-input');
-            const text = input.value.trim();
-            if (text && data[cat]) {
-                data[cat].push({ text: text, checked: false });
-                saveData();
-                render();
-                setTimeout(() => {
-                    const newInput = container.querySelector('.add-item-input');
-                    if (newInput) {
-                        newInput.value = '';
-                        newInput.focus();
-                    }
-                }, 50);
-            }
-        }
-
-        function handleAddInputKeydown(e) {
-            if (e.key === 'Enter') {
-                const btn = e.target.closest('.categoria').querySelector('.add-item-confirm');
-                if (btn) btn.click();
-            }
-        }
-
-        function handleCategoryDelete(e) {
-            if (!editMode) return;
-            e.stopPropagation();
-            const catId = e.target.dataset.categoria;
-            if (categories.length <= 1) {
-                alert('Debe haber al menos una categoría');
-                return;
-            }
-            if (confirm(`¿Eliminar la categoría "${getCategoryName(catId)}" y todos sus items?`)) {
-                const index = categories.findIndex(c => c.id === catId);
-                if (index !== -1) {
-                    categories.splice(index, 1);
-                    delete data[catId];
-                    delete collapsedCategories[catId];
-                    saveData();
-                    render();
-                }
-            }
-        }
-
-        function handleNuevaCategoriaClick() {
-            const container = document.getElementById('addCategoriaTop');
-            container.classList.toggle('show');
-            if (container.classList.contains('show')) {
-                document.getElementById('addCategoriaInput').focus();
-            }
-        }
-
-        function handleCancelCategoria() {
-            document.getElementById('addCategoriaTop').classList.remove('show');
-            document.getElementById('addCategoriaInput').value = '';
-        }
-
-        function handleAddCategory() {
-            const input = document.getElementById('addCategoriaInput');
-            const select = document.getElementById('addCategoriaIcon');
-            const name = input.value.trim();
-            const emoji = select.value;
-            if (!name) {
-                alert('Ingresa un nombre para la categoría');
-                return;
-            }
-            const id = name.toLowerCase().replace(/[^a-z0-9]/g, '');
-            if (categories.find(c => c.id === id)) {
-                alert('Ya existe una categoría con ese nombre');
-                return;
-            }
-            categories.push({ id, emoji, nombre: name, items: [] });
-            data[id] = [];
-            collapsedCategories[id] = false;
-            saveData();
-            render();
-            input.value = '';
-            document.getElementById('addCategoriaTop').classList.remove('show');
-        }
-
-        function handleAddCategoryKeydown(e) {
-            if (e.key === 'Enter') {
-                document.getElementById('addCategoriaBtn').click();
-            }
-            if (e.key === 'Escape') {
-                document.getElementById('cancelCategoriaBtn').click();
-            }
-        }
-
-        // ============================================================
-        // DRAG & DROP
-        // ============================================================
-        function handleDragStart(e) {
-            if (!editMode) return;
-            const item = e.target.closest('.item');
-            if (!item) return;
-            const cat = item.dataset.categoria;
-            const index = parseInt(item.dataset.index);
-            dragData = { cat, index };
-            item.classList.add('dragging');
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/plain', `${cat}|${index}`);
-            setTimeout(() => { item.style.opacity = '0.4'; }, 0);
-        }
-
-        function handleDragEnd(e) {
-            const item = e.target.closest('.item');
-            if (item) {
-                item.classList.remove('dragging');
-                item.style.opacity = '1';
-            }
-            document.querySelectorAll('.item.drag-over').forEach(el => el.classList.remove('drag-over'));
-            dragData = null;
-            dragOverData = null;
-        }
-
-        function handleDragOver(e) {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-            const targetItem = e.target.closest('.item');
-            if (!targetItem || !dragData) return;
-            const cat = targetItem.dataset.categoria;
-            const index = parseInt(targetItem.dataset.index);
-            if (cat === dragData.cat && index !== dragData.index) {
-                document.querySelectorAll('.item.drag-over').forEach(el => el.classList.remove('drag-over'));
-                targetItem.classList.add('drag-over');
-                dragOverData = { cat, index };
-            }
-        }
-
-        function handleDragLeave(e) {
-            const targetItem = e.target.closest('.item');
-            if (targetItem) {
-                targetItem.classList.remove('drag-over');
-            }
-        }
-
-        function handleDrop(e) {
-            e.preventDefault();
-            const targetItem = e.target.closest('.item');
-            if (!targetItem || !dragData || !dragOverData) return;
-            if (dragData.cat === dragOverData.cat && dragData.index !== dragOverData.index) {
-                const cat = dragData.cat;
-                const from = dragData.index;
-                const to = dragOverData.index;
-                const items = data[cat];
-                if (items) {
-                    const [moved] = items.splice(from, 1);
-                    items.splice(to, 0, moved);
-                    saveData();
-                    render();
-                }
-            }
-            targetItem.classList.remove('drag-over');
-            dragData = null;
-            dragOverData = null;
-        }
-
-        function handleCatDragStart(e) {
-            if (!editMode) return;
-            const wrapper = e.target.closest('.categoria-wrapper');
-            if (!wrapper) return;
-            const catId = wrapper.dataset.categoriaId;
-            catDragData = { catId };
-            wrapper.classList.add('dragging-cat');
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/plain', catId);
-            setTimeout(() => { wrapper.style.opacity = '0.4'; }, 0);
-        }
-
-        function handleCatDragEnd(e) {
-            const wrapper = e.target.closest('.categoria-wrapper');
-            if (wrapper) {
-                wrapper.classList.remove('dragging-cat');
-                wrapper.style.opacity = '1';
-            }
-            document.querySelectorAll('.categoria-wrapper.drag-over-cat').forEach(el => el.classList.remove('drag-over-cat'));
-            catDragData = null;
-            catDragOverData = null;
-        }
-
-        function handleCatDragOver(e) {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-            const targetWrapper = e.target.closest('.categoria-wrapper');
-            if (!targetWrapper || !catDragData) return;
-            const catId = targetWrapper.dataset.categoriaId;
-            if (catId !== catDragData.catId) {
-                document.querySelectorAll('.categoria-wrapper.drag-over-cat').forEach(el => el.classList.remove('drag-over-cat'));
-                targetWrapper.classList.add('drag-over-cat');
-                catDragOverData = { catId };
-            }
-        }
-
-        function handleCatDragLeave(e) {
-            const targetWrapper = e.target.closest('.categoria-wrapper');
-            if (targetWrapper) {
-                targetWrapper.classList.remove('drag-over-cat');
-            }
-        }
-
-        function handleCatDrop(e) {
-            e.preventDefault();
-            const targetWrapper = e.target.closest('.categoria-wrapper');
-            if (!targetWrapper || !catDragData || !catDragOverData) return;
-            if (catDragData.catId !== catDragOverData.catId) {
-                const fromIndex = categories.findIndex(c => c.id === catDragData.catId);
-                const toIndex = categories.findIndex(c => c.id === catDragOverData.catId);
-                if (fromIndex !== -1 && toIndex !== -1) {
-                    const [moved] = categories.splice(fromIndex, 1);
-                    categories.splice(toIndex, 0, moved);
-                    saveData();
-                    render();
-                }
-            }
-            targetWrapper.classList.remove('drag-over-cat');
-            catDragData = null;
-            catDragOverData = null;
-        }
-
-        function handleReset() {
-            if (confirm('¿Reiniciar todos los ítems? (se desmarcarán todos)')) {
-                Object.keys(data).forEach(cat => {
-                    data[cat].forEach(item => { item.checked = false; });
-                });
-                saveData();
-                render();
-            }
-        }
-
-        function handleEditToggle() {
-            editMode = !editMode;
-            const btn = document.getElementById('editBtn');
-            btn.textContent = editMode ? '✅ Listo' : '✏️ Editar';
-            btn.classList.toggle('active', editMode);
-            if (!editMode) {
-                document.getElementById('addCategoriaTop').classList.remove('show');
-            }
-            render();
-        }
-
-        loadData();
-        render();
-    </script>
+loadData();render();
+</script>
 </body>
 </html>
