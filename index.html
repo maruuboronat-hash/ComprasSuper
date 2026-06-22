@@ -1,1 +1,776 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lista de Compras</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            padding-bottom: 100px;
+            max-width: 800px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 28px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            touch-action: manipulation;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-reset {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-reset:hover {
+            background: #c0392b;
+        }
+
+        .btn-edit {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #2980b9;
+        }
+
+        .btn-edit.active {
+            background: #e67e22;
+        }
+
+        .btn-save {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: #229954;
+        }
+
+        .categoria {
+            background: white;
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .categoria-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .categoria-titulo {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .categoria-titulo .emoji {
+            font-size: 24px;
+        }
+
+        .add-item-btn {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 22px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+        }
+
+        .add-item-btn.show {
+            display: flex;
+        }
+
+        .add-item-btn:active {
+            transform: scale(0.9);
+        }
+
+        .item {
+            display: flex;
+            align-items: center;
+            padding: 10px 8px;
+            border-radius: 10px;
+            margin-bottom: 4px;
+            transition: all 0.2s;
+            background: #fafafa;
+            gap: 12px;
+            touch-action: none;
+        }
+
+        .item.dragging {
+            opacity: 0.5;
+            background: #e8f4fd;
+        }
+
+        .item.drag-over {
+            border-top: 3px solid #3498db;
+            background: #ebf5fb;
+        }
+
+        .drag-handle {
+            color: #bdc3c7;
+            font-size: 18px;
+            cursor: grab;
+            display: none;
+            user-select: none;
+            padding: 4px;
+            touch-action: none;
+        }
+
+        .drag-handle.show {
+            display: block;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .item-checkbox {
+            width: 22px;
+            height: 22px;
+            min-width: 22px;
+            border-radius: 6px;
+            border: 2px solid #bdc3c7;
+            appearance: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            touch-action: manipulation;
+        }
+
+        .item-checkbox:checked {
+            background: #2ecc71;
+            border-color: #2ecc71;
+        }
+
+        .item-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .item-text {
+            flex: 1;
+            font-size: 17px;
+            color: #2c3e50;
+            transition: all 0.3s;
+            word-break: break-word;
+        }
+
+        .item-text.checked {
+            text-decoration: line-through;
+            color: #95a5a6;
+        }
+
+        .item-delete {
+            color: #e74c3c;
+            font-size: 20px;
+            cursor: pointer;
+            display: none;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            touch-action: manipulation;
+            font-weight: bold;
+        }
+
+        .item-delete.show {
+            display: block;
+        }
+
+        .item-delete:active {
+            background: #fee;
+            transform: scale(0.9);
+        }
+
+        .add-item-input-container {
+            display: none;
+            margin-top: 12px;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .add-item-input-container.show {
+            display: flex;
+        }
+
+        .add-item-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 2px solid #bdc3c7;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+            background: white;
+        }
+
+        .add-item-input:focus {
+            border-color: #3498db;
+        }
+
+        .add-item-confirm {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            touch-action: manipulation;
+            white-space: nowrap;
+        }
+
+        .add-item-confirm:active {
+            transform: scale(0.95);
+        }
+
+        .item-count {
+            font-size: 14px;
+            color: #7f8c8d;
+            font-weight: 400;
+        }
+
+        /* Modo edición */
+        .edit-mode .item-delete {
+            display: block !important;
+        }
+
+        .edit-mode .drag-handle {
+            display: block !important;
+        }
+
+        .edit-mode .add-item-btn {
+            display: flex !important;
+        }
+
+        .empty-message {
+            text-align: center;
+            color: #bdc3c7;
+            padding: 20px;
+            font-size: 16px;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            body {
+                padding: 12px;
+                padding-bottom: 80px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .btn {
+                padding: 10px 18px;
+                font-size: 14px;
+            }
+
+            .categoria {
+                padding: 12px;
+            }
+
+            .categoria-titulo {
+                font-size: 17px;
+            }
+
+            .item {
+                padding: 8px 6px;
+            }
+
+            .item-text {
+                font-size: 15px;
+            }
+
+            .item-checkbox {
+                width: 20px;
+                height: 20px;
+                min-width: 20px;
+            }
+
+            .drag-handle {
+                font-size: 16px;
+            }
+        }
+
+        /* Toque feedback */
+        .item:active {
+            background: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <h1>
+        🛒 Lista de Compras
+        <span class="item-count" id="totalItems">0 items</span>
+    </h1>
+
+    <div class="header-buttons">
+        <button class="btn btn-reset" id="resetBtn">🔄 Reiniciar</button>
+        <button class="btn btn-edit" id="editBtn">✏️ Editar</button>
+    </div>
+
+    <div id="listaContainer"></div>
+
+    <script>
+        // ============================================================
+        // DATOS INICIALES
+        // ============================================================
+        const categoriasData = [
+            {
+                id: 'verduleria',
+                emoji: '🥬',
+                nombre: 'Verdulería',
+                items: ['Bananas', 'Manzanas', 'Naranjas', 'Limones', 'Tomates', 'Lechuga', 'Zanahorias', 'Cebollas', 'Papas', 'Batatas', 'Palta']
+            },
+            {
+                id: 'lacteos',
+                emoji: '🧀',
+                nombre: 'Lácteos',
+                items: ['Leche', 'Yogur', 'Queso cremoso', 'Queso rallado', 'Manteca', 'Huevos']
+            },
+            {
+                id: 'almacen',
+                emoji: '🥫',
+                nombre: 'Almacén',
+                items: ['Arroz', 'Fideos', 'Puré de tomate', 'Atún', 'Lentejas', 'Garbanzos', 'Aceite', 'Vinagre', 'Sal', 'Azúcar', 'Harina', 'Pan rallado']
+            },
+            {
+                id: 'panaderia',
+                emoji: '🍞',
+                nombre: 'Panadería',
+                items: ['Pan de molde', 'Pan francés', 'Tostadas']
+            },
+            {
+                id: 'carnes',
+                emoji: '🥩',
+                nombre: 'Carnes',
+                items: ['Pollo', 'Carne picada', 'Milanesas', 'Pescado']
+            },
+            {
+                id: 'congelados',
+                emoji: '❄️',
+                nombre: 'Congelados',
+                items: ['Verduras congeladas', 'Hamburguesas', 'Helado']
+            },
+            {
+                id: 'desayuno',
+                emoji: '☕',
+                nombre: 'Desayuno y merienda',
+                items: ['Café', 'Té', 'Galletitas', 'Mermelada', 'Dulce de leche', 'Cereales']
+            },
+            {
+                id: 'limpieza',
+                emoji: '🧹',
+                nombre: 'Limpieza',
+                items: ['Detergente', 'Esponja', 'Lavandina', 'Limpiador de pisos', 'Bolsas de residuos', 'Papel de cocina']
+            },
+            {
+                id: 'higiene',
+                emoji: '🧴',
+                nombre: 'Higiene personal',
+                items: ['Papel higiénico', 'Shampoo', 'Acondicionador', 'Jabón', 'Pasta dental', 'Desodorante']
+            },
+            {
+                id: 'bebidas',
+                emoji: '🥤',
+                nombre: 'Bebidas',
+                items: ['Agua', 'Gaseosas', 'Jugo', 'Cerveza', 'Vino']
+            }
+        ];
+
+        // ============================================================
+        // ESTADO
+        // ============================================================
+        let data = {};
+        let editMode = false;
+        let dragData = null;
+        let dragOverData = null;
+
+        // Cargar desde localStorage
+        function loadData() {
+            const saved = localStorage.getItem('listaCompras');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    // Asegurar que todas las categorías existan
+                    let allItemsPresent = true;
+                    categoriasData.forEach(cat => {
+                        if (!parsed[cat.id]) {
+                            allItemsPresent = false;
+                            parsed[cat.id] = cat.items.map(item => ({ text: item, checked: false }));
+                        } else {
+                            // Verificar que todos los items iniciales estén
+                            const existingTexts = parsed[cat.id].map(i => i.text);
+                            cat.items.forEach(item => {
+                                if (!existingTexts.includes(item)) {
+                                    parsed[cat.id].push({ text: item, checked: false });
+                                }
+                            });
+                        }
+                    });
+                    if (allItemsPresent) {
+                        data = parsed;
+                        return;
+                    }
+                } catch (e) {
+                    console.warn('Error al cargar datos, usando datos iniciales');
+                }
+            }
+            // Datos iniciales
+            data = {};
+            categoriasData.forEach(cat => {
+                data[cat.id] = cat.items.map(item => ({ text: item, checked: false }));
+            });
+            saveData();
+        }
+
+        function saveData() {
+            localStorage.setItem('listaCompras', JSON.stringify(data));
+            updateTotalCount();
+        }
+
+        function updateTotalCount() {
+            let total = 0;
+            Object.values(data).forEach(items => { total += items.length; });
+            document.getElementById('totalItems').textContent = total + ' items';
+        }
+
+        // ============================================================
+        // RENDER
+        // ============================================================
+        function render() {
+            const container = document.getElementById('listaContainer');
+            container.innerHTML = '';
+
+            categoriasData.forEach(cat => {
+                const items = data[cat.id] || [];
+                const checkedCount = items.filter(i => i.checked).length;
+
+                const div = document.createElement('div');
+                div.className = 'categoria';
+                if (editMode) div.classList.add('edit-mode');
+
+                div.innerHTML = `
+                    <div class="categoria-header">
+                        <div class="categoria-titulo">
+                            <span class="emoji">${cat.emoji}</span>
+                            ${cat.nombre}
+                            <span class="item-count">(${items.length})</span>
+                        </div>
+                        <button class="add-item-btn ${editMode ? 'show' : ''}" data-categoria="${cat.id}">+</button>
+                    </div>
+                    <div class="items-container" data-categoria="${cat.id}">
+                        ${items.length === 0 ? '<div class="empty-message">Sin items</div>' : ''}
+                        ${items.map((item, index) => `
+                            <div class="item" data-categoria="${cat.id}" data-index="${index}" draggable="${editMode}">
+                                <span class="drag-handle ${editMode ? 'show' : ''}">⠿</span>
+                                <input type="checkbox" class="item-checkbox" ${item.checked ? 'checked' : ''} data-categoria="${cat.id}" data-index="${index}">
+                                <span class="item-text ${item.checked ? 'checked' : ''}">${item.text}</span>
+                                <span class="item-delete ${editMode ? 'show' : ''}" data-categoria="${cat.id}" data-index="${index}">✕</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="add-item-input-container ${editMode ? 'show' : ''}" data-categoria="${cat.id}">
+                        <input type="text" class="add-item-input" placeholder="Nuevo item...">
+                        <button class="add-item-confirm" data-categoria="${cat.id}">Agregar</button>
+                    </div>
+                `;
+
+                container.appendChild(div);
+            });
+
+            // Event listeners
+            attachEvents();
+            updateTotalCount();
+        }
+
+        // ============================================================
+        // EVENTOS
+        // ============================================================
+        function attachEvents() {
+            // Checkboxes
+            document.querySelectorAll('.item-checkbox').forEach(cb => {
+                cb.removeEventListener('change', handleCheckboxChange);
+                cb.addEventListener('change', handleCheckboxChange);
+            });
+
+            // Botones eliminar
+            document.querySelectorAll('.item-delete').forEach(btn => {
+                btn.removeEventListener('click', handleDelete);
+                btn.addEventListener('click', handleDelete);
+            });
+
+            // Botones agregar (+)
+            document.querySelectorAll('.add-item-btn').forEach(btn => {
+                btn.removeEventListener('click', handleAddBtnClick);
+                btn.addEventListener('click', handleAddBtnClick);
+            });
+
+            // Botones confirmar agregar
+            document.querySelectorAll('.add-item-confirm').forEach(btn => {
+                btn.removeEventListener('click', handleAddConfirm);
+                btn.addEventListener('click', handleAddConfirm);
+            });
+
+            // Inputs de agregar - Enter
+            document.querySelectorAll('.add-item-input').forEach(input => {
+                input.removeEventListener('keydown', handleAddInputKeydown);
+                input.addEventListener('keydown', handleAddInputKeydown);
+            });
+
+            // Drag & Drop
+            if (editMode) {
+                document.querySelectorAll('.item').forEach(item => {
+                    item.removeEventListener('dragstart', handleDragStart);
+                    item.removeEventListener('dragend', handleDragEnd);
+                    item.removeEventListener('dragover', handleDragOver);
+                    item.removeEventListener('dragleave', handleDragLeave);
+                    item.removeEventListener('drop', handleDrop);
+                    item.addEventListener('dragstart', handleDragStart);
+                    item.addEventListener('dragend', handleDragEnd);
+                    item.addEventListener('dragover', handleDragOver);
+                    item.addEventListener('dragleave', handleDragLeave);
+                    item.addEventListener('drop', handleDrop);
+                });
+            }
+
+            // Botón Reiniciar
+            document.getElementById('resetBtn').removeEventListener('click', handleReset);
+            document.getElementById('resetBtn').addEventListener('click', handleReset);
+
+            // Botón Editar
+            document.getElementById('editBtn').removeEventListener('click', handleEditToggle);
+            document.getElementById('editBtn').addEventListener('click', handleEditToggle);
+        }
+
+        // ============================================================
+        // HANDLERS
+        // ============================================================
+        function handleCheckboxChange(e) {
+            const cat = e.target.dataset.categoria;
+            const index = parseInt(e.target.dataset.index);
+            if (data[cat] && data[cat][index]) {
+                data[cat][index].checked = e.target.checked;
+                saveData();
+                // Actualizar visualmente sin re-renderizar todo
+                const textSpan = e.target.closest('.item').querySelector('.item-text');
+                if (textSpan) {
+                    textSpan.classList.toggle('checked', e.target.checked);
+                }
+                updateTotalCount();
+            }
+        }
+
+        function handleDelete(e) {
+            if (!editMode) return;
+            const cat = e.target.dataset.categoria;
+            const index = parseInt(e.target.dataset.index);
+            if (data[cat]) {
+                data[cat].splice(index, 1);
+                saveData();
+                render();
+            }
+        }
+
+        function handleAddBtnClick(e) {
+            const cat = e.target.dataset.categoria;
+            const container = e.target.closest('.categoria');
+            const inputContainer = container.querySelector('.add-item-input-container');
+            const input = inputContainer.querySelector('.add-item-input');
+            inputContainer.classList.toggle('show');
+            if (inputContainer.classList.contains('show')) {
+                input.focus();
+            }
+        }
+
+        function handleAddConfirm(e) {
+            const cat = e.target.dataset.categoria;
+            const container = e.target.closest('.categoria');
+            const input = container.querySelector('.add-item-input');
+            const text = input.value.trim();
+            if (text && data[cat]) {
+                data[cat].push({ text: text, checked: false });
+                saveData();
+                render();
+                // Re-enfocar el input después de renderizar
+                setTimeout(() => {
+                    const newInput = container.querySelector('.add-item-input');
+                    if (newInput) {
+                        newInput.value = '';
+                        newInput.focus();
+                    }
+                }, 50);
+            }
+        }
+
+        function handleAddInputKeydown(e) {
+            if (e.key === 'Enter') {
+                const btn = e.target.closest('.categoria').querySelector('.add-item-confirm');
+                if (btn) btn.click();
+            }
+        }
+
+        // ============================================================
+        // DRAG & DROP
+        // ============================================================
+        function handleDragStart(e) {
+            if (!editMode) return;
+            const item = e.target.closest('.item');
+            if (!item) return;
+            const cat = item.dataset.categoria;
+            const index = parseInt(item.dataset.index);
+            dragData = { cat, index };
+            item.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', `${cat}|${index}`);
+            setTimeout(() => { item.style.opacity = '0.4'; }, 0);
+        }
+
+        function handleDragEnd(e) {
+            const item = e.target.closest('.item');
+            if (item) {
+                item.classList.remove('dragging');
+                item.style.opacity = '1';
+            }
+            document.querySelectorAll('.item.drag-over').forEach(el => el.classList.remove('drag-over'));
+            dragData = null;
+            dragOverData = null;
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            const targetItem = e.target.closest('.item');
+            if (!targetItem || !dragData) return;
+            const cat = targetItem.dataset.categoria;
+            const index = parseInt(targetItem.dataset.index);
+            if (cat === dragData.cat && index !== dragData.index) {
+                document.querySelectorAll('.item.drag-over').forEach(el => el.classList.remove('drag-over'));
+                targetItem.classList.add('drag-over');
+                dragOverData = { cat, index };
+            }
+        }
+
+        function handleDragLeave(e) {
+            const targetItem = e.target.closest('.item');
+            if (targetItem) {
+                targetItem.classList.remove('drag-over');
+            }
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const targetItem = e.target.closest('.item');
+            if (!targetItem || !dragData || !dragOverData) return;
+            if (dragData.cat === dragOverData.cat && dragData.index !== dragOverData.index) {
+                const cat = dragData.cat;
+                const from = dragData.index;
+                const to = dragOverData.index;
+                const items = data[cat];
+                if (items) {
+                    const [moved] = items.splice(from, 1);
+                    items.splice(to, 0, moved);
+                    saveData();
+                    render();
+                }
+            }
+            targetItem.classList.remove('drag-over');
+            dragData = null;
+            dragOverData = null;
+        }
+
+        // ============================================================
+        // BOTONES PRINCIPALES
+        // ============================================================
+        function handleReset() {
+            if (confirm('¿Reiniciar todos los ítems? (se desmarcarán todos)')) {
+                Object.keys(data).forEach(cat => {
+                    data[cat].forEach(item => { item.checked = false; });
+                });
+                saveData();
+                render();
+            }
+        }
+
+        function handleEditToggle() {
+            editMode = !editMode;
+            const btn = document.getElementById('editBtn');
+            btn.textContent = editMode ? '🔒 Salir' : '✏️ Editar';
+            btn.classList.toggle('active', editMode);
+            render();
+        }
+
+        // ============================================================
+        // INICIO
+        // ============================================================
+        loadData();
+        render();
+    </script>
+</body>
+</html>
