@@ -79,16 +79,6 @@
             background: #e67e22;
         }
 
-        .btn-save {
-            background: #27ae60;
-            color: white;
-        }
-
-        .btn-save:hover {
-            background: #229954;
-        }
-
-        /* Contenedor para agregar categoría (arriba de todo) */
         .add-categoria-top {
             background: white;
             border-radius: 16px;
@@ -161,7 +151,6 @@
             background: #27ae60;
         }
 
-        /* Wrapper para arrastrar categorías */
         .categoria-wrapper {
             transition: all 0.3s ease;
         }
@@ -200,7 +189,6 @@
             flex: 1;
         }
 
-        /* Rayitas para arrastrar categoría */
         .cat-drag-handle {
             color: #bdc3c7;
             font-size: 20px;
@@ -262,7 +250,6 @@
             transform: scale(0.9);
         }
 
-        /* Botón eliminar categoría */
         .cat-delete-btn {
             background: #e74c3c;
             color: white;
@@ -442,7 +429,6 @@
             font-weight: 400;
         }
 
-        /* Modo edición */
         .edit-mode .item-delete {
             display: block !important;
         }
@@ -474,7 +460,6 @@
             font-size: 16px;
         }
 
-        /* Responsive */
         @media (max-width: 600px) {
             body {
                 padding: 12px;
@@ -528,7 +513,6 @@
             }
         }
 
-        /* Toque feedback */
         .item:active {
             background: #f0f0f0;
         }
@@ -545,7 +529,6 @@
         <button class="btn btn-edit" id="editBtn">✏️ Editar</button>
     </div>
 
-    <!-- Contenedor para agregar categoría (arriba de todo) -->
     <div class="add-categoria-top" id="addCategoriaTop">
         <input type="text" id="addCategoriaInput" placeholder="Nueva categoría...">
         <select id="addCategoriaIcon">
@@ -570,75 +553,19 @@
     <div id="listaContainer"></div>
 
     <script>
-        // ============================================================
-        // DATOS INICIALES
-        // ============================================================
         const categoriasData = [
-            {
-                id: 'verduleria',
-                emoji: '🥬',
-                nombre: 'Verdulería',
-                items: ['Bananas', 'Manzanas', 'Naranjas', 'Limones', 'Tomates', 'Lechuga', 'Zanahorias', 'Cebollas', 'Papas', 'Batatas', 'Palta']
-            },
-            {
-                id: 'lacteos',
-                emoji: '🧀',
-                nombre: 'Lácteos',
-                items: ['Leche', 'Yogur', 'Queso cremoso', 'Queso rallado', 'Manteca', 'Huevos']
-            },
-            {
-                id: 'almacen',
-                emoji: '🥫',
-                nombre: 'Almacén',
-                items: ['Arroz', 'Fideos', 'Puré de tomate', 'Atún', 'Lentejas', 'Garbanzos', 'Aceite', 'Vinagre', 'Sal', 'Azúcar', 'Harina', 'Pan rallado']
-            },
-            {
-                id: 'panaderia',
-                emoji: '🍞',
-                nombre: 'Panadería',
-                items: ['Pan de molde', 'Pan francés', 'Tostadas']
-            },
-            {
-                id: 'carnes',
-                emoji: '🥩',
-                nombre: 'Carnes',
-                items: ['Pollo', 'Carne picada', 'Milanesas', 'Pescado']
-            },
-            {
-                id: 'congelados',
-                emoji: '❄️',
-                nombre: 'Congelados',
-                items: ['Verduras congeladas', 'Hamburguesas', 'Helado']
-            },
-            {
-                id: 'desayuno',
-                emoji: '☕',
-                nombre: 'Desayuno y merienda',
-                items: ['Café', 'Té', 'Galletitas', 'Mermelada', 'Dulce de leche', 'Cereales']
-            },
-            {
-                id: 'limpieza',
-                emoji: '🧹',
-                nombre: 'Limpieza',
-                items: ['Detergente', 'Esponja', 'Lavandina', 'Limpiador de pisos', 'Bolsas de residuos', 'Papel de cocina']
-            },
-            {
-                id: 'higiene',
-                emoji: '🧴',
-                nombre: 'Higiene personal',
-                items: ['Papel higiénico', 'Shampoo', 'Acondicionador', 'Jabón', 'Pasta dental', 'Desodorante']
-            },
-            {
-                id: 'bebidas',
-                emoji: '🥤',
-                nombre: 'Bebidas',
-                items: ['Agua', 'Gaseosas', 'Jugo', 'Cerveza', 'Vino']
-            }
+            { id: 'verduleria', emoji: '🥬', nombre: 'Verdulería', items: ['Bananas', 'Manzanas', 'Naranjas', 'Limones', 'Tomates', 'Lechuga', 'Zanahorias', 'Cebollas', 'Papas', 'Batatas', 'Palta'] },
+            { id: 'lacteos', emoji: '🧀', nombre: 'Lácteos', items: ['Leche', 'Yogur', 'Queso cremoso', 'Queso rallado', 'Manteca', 'Huevos'] },
+            { id: 'almacen', emoji: '🥫', nombre: 'Almacén', items: ['Arroz', 'Fideos', 'Puré de tomate', 'Atún', 'Lentejas', 'Garbanzos', 'Aceite', 'Vinagre', 'Sal', 'Azúcar', 'Harina', 'Pan rallado'] },
+            { id: 'panaderia', emoji: '🍞', nombre: 'Panadería', items: ['Pan de molde', 'Pan francés', 'Tostadas'] },
+            { id: 'carnes', emoji: '🥩', nombre: 'Carnes', items: ['Pollo', 'Carne picada', 'Milanesas', 'Pescado'] },
+            { id: 'congelados', emoji: '❄️', nombre: 'Congelados', items: ['Verduras congeladas', 'Hamburguesas', 'Helado'] },
+            { id: 'desayuno', emoji: '☕', nombre: 'Desayuno y merienda', items: ['Café', 'Té', 'Galletitas', 'Mermelada', 'Dulce de leche', 'Cereales'] },
+            { id: 'limpieza', emoji: '🧹', nombre: 'Limpieza', items: ['Detergente', 'Esponja', 'Lavandina', 'Limpiador de pisos', 'Bolsas de residuos', 'Papel de cocina'] },
+            { id: 'higiene', emoji: '🧴', nombre: 'Higiene personal', items: ['Papel higiénico', 'Shampoo', 'Acondicionador', 'Jabón', 'Pasta dental', 'Desodorante'] },
+            { id: 'bebidas', emoji: '🥤', nombre: 'Bebidas', items: ['Agua', 'Gaseosas', 'Jugo', 'Cerveza', 'Vino'] }
         ];
 
-        // ============================================================
-        // ESTADO
-        // ============================================================
         let categories = [];
         let data = {};
         let editMode = false;
@@ -647,7 +574,6 @@
         let catDragData = null;
         let catDragOverData = null;
 
-        // Cargar desde localStorage
         function loadData() {
             const saved = localStorage.getItem('listaComprasPro');
             if (saved) {
@@ -656,12 +582,10 @@
                     if (parsed.categories && parsed.data) {
                         categories = parsed.categories;
                         data = parsed.data;
-                        // Asegurar que todas las categorías existan
                         categories.forEach(cat => {
                             if (!data[cat.id]) {
                                 data[cat.id] = cat.items.map(item => ({ text: item, checked: false }));
                             } else {
-                                // Verificar que todos los items iniciales estén
                                 const existingTexts = data[cat.id].map(i => i.text);
                                 cat.items.forEach(item => {
                                     if (!existingTexts.includes(item)) {
@@ -673,11 +597,8 @@
                         saveData();
                         return;
                     }
-                } catch (e) {
-                    console.warn('Error al cargar datos, usando datos iniciales');
-                }
+                } catch (e) { console.warn('Error al cargar datos'); }
             }
-            // Datos iniciales
             categories = JSON.parse(JSON.stringify(categoriasData));
             data = {};
             categories.forEach(cat => {
@@ -702,9 +623,6 @@
             return cat ? cat.nombre : catId;
         }
 
-        // ============================================================
-        // RENDER
-        // ============================================================
         function render() {
             const container = document.getElementById('listaContainer');
             container.innerHTML = '';
@@ -757,52 +675,41 @@
                 container.appendChild(wrapper);
             });
 
-            // Event listeners
             attachEvents();
             updateTotalCount();
         }
 
-        // ============================================================
-        // EVENTOS
-        // ============================================================
         function attachEvents() {
-            // Checkboxes
             document.querySelectorAll('.item-checkbox').forEach(cb => {
                 cb.removeEventListener('change', handleCheckboxChange);
                 cb.addEventListener('change', handleCheckboxChange);
             });
 
-            // Botones eliminar items
             document.querySelectorAll('.item-delete').forEach(btn => {
                 btn.removeEventListener('click', handleDelete);
                 btn.addEventListener('click', handleDelete);
             });
 
-            // Botones agregar items (+)
             document.querySelectorAll('.add-item-btn').forEach(btn => {
                 btn.removeEventListener('click', handleAddBtnClick);
                 btn.addEventListener('click', handleAddBtnClick);
             });
 
-            // Botones confirmar agregar items
             document.querySelectorAll('.add-item-confirm').forEach(btn => {
                 btn.removeEventListener('click', handleAddConfirm);
                 btn.addEventListener('click', handleAddConfirm);
             });
 
-            // Inputs de agregar items - Enter
             document.querySelectorAll('.add-item-input').forEach(input => {
                 input.removeEventListener('keydown', handleAddInputKeydown);
                 input.addEventListener('keydown', handleAddInputKeydown);
             });
 
-            // Botones eliminar categoría
             document.querySelectorAll('.cat-delete-btn').forEach(btn => {
                 btn.removeEventListener('click', handleCategoryDelete);
                 btn.addEventListener('click', handleCategoryDelete);
             });
 
-            // Drag & Drop items
             if (editMode) {
                 document.querySelectorAll('.item').forEach(item => {
                     item.removeEventListener('dragstart', handleDragStart);
@@ -817,7 +724,6 @@
                     item.addEventListener('drop', handleDrop);
                 });
 
-                // Drag & Drop categorías
                 document.querySelectorAll('.categoria-wrapper').forEach(wrapper => {
                     wrapper.removeEventListener('dragstart', handleCatDragStart);
                     wrapper.removeEventListener('dragend', handleCatDragEnd);
@@ -832,15 +738,12 @@
                 });
             }
 
-            // Botón Reiniciar
             document.getElementById('resetBtn').removeEventListener('click', handleReset);
             document.getElementById('resetBtn').addEventListener('click', handleReset);
 
-            // Botón Editar
             document.getElementById('editBtn').removeEventListener('click', handleEditToggle);
             document.getElementById('editBtn').addEventListener('click', handleEditToggle);
 
-            // Botón Agregar Categoría
             document.getElementById('addCategoriaBtn').removeEventListener('click', handleAddCategory);
             document.getElementById('addCategoriaBtn').addEventListener('click', handleAddCategory);
 
@@ -848,9 +751,6 @@
             document.getElementById('addCategoriaInput').addEventListener('keydown', handleAddCategoryKeydown);
         }
 
-        // ============================================================
-        // HANDLERS - ITEMS
-        // ============================================================
         function handleCheckboxChange(e) {
             const cat = e.target.dataset.categoria;
             const index = parseInt(e.target.dataset.index);
@@ -913,9 +813,6 @@
             }
         }
 
-        // ============================================================
-        // HANDLERS - CATEGORÍAS
-        // ============================================================
         function handleCategoryDelete(e) {
             if (!editMode) return;
             const catId = e.target.dataset.categoria;
@@ -962,9 +859,6 @@
             }
         }
 
-        // ============================================================
-        // DRAG & DROP ITEMS
-        // ============================================================
         function handleDragStart(e) {
             if (!editMode) return;
             const item = e.target.closest('.item');
@@ -1031,9 +925,6 @@
             dragOverData = null;
         }
 
-        // ============================================================
-        // DRAG & DROP CATEGORÍAS
-        // ============================================================
         function handleCatDragStart(e) {
             if (!editMode) return;
             const wrapper = e.target.closest('.categoria-wrapper');
@@ -1096,9 +987,6 @@
             catDragOverData = null;
         }
 
-        // ============================================================
-        // BOTONES PRINCIPALES
-        // ============================================================
         function handleReset() {
             if (confirm('¿Reiniciar todos los ítems? (se desmarcarán todos)')) {
                 Object.keys(data).forEach(cat => {
@@ -1117,5 +1005,9 @@
             render();
         }
 
-        // ============================================================
-       
+        // INICIO
+        loadData();
+        render();
+    </script>
+</body>
+</html>
