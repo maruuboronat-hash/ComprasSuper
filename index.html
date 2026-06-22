@@ -93,7 +93,6 @@
             background: #8e44ad;
         }
 
-        /* Contenedor para agregar categoría (arriba de todo) */
         .add-categoria-top {
             background: white;
             border-radius: 16px;
@@ -464,10 +463,6 @@
             display: flex !important;
         }
 
-        .edit-mode .add-categoria-top {
-            display: flex !important;
-        }
-
         .edit-mode .btn-nueva-categoria {
             display: inline-block !important;
         }
@@ -549,7 +544,6 @@
         <button class="btn btn-nueva-categoria" id="btnNuevaCategoria">➕ Nueva Categoría</button>
     </div>
 
-    <!-- Contenedor para agregar categoría (se muestra al hacer click en "Nueva Categoría") -->
     <div class="add-categoria-top" id="addCategoriaTop">
         <input type="text" id="addCategoriaInput" placeholder="Nombre de la categoría...">
         <select id="addCategoriaIcon">
@@ -697,12 +691,12 @@
                 container.appendChild(wrapper);
             });
 
-            // Actualizar estado del botón "Nueva Categoría"
             const btnNueva = document.getElementById('btnNuevaCategoria');
             if (editMode) {
                 btnNueva.classList.add('show');
             } else {
                 btnNueva.classList.remove('show');
+                document.getElementById('addCategoriaTop').classList.remove('show');
             }
 
             attachEvents();
@@ -787,9 +781,6 @@
             document.getElementById('addCategoriaInput').addEventListener('keydown', handleAddCategoryKeydown);
         }
 
-        // ============================================================
-        // HANDLERS
-        // ============================================================
         function handleCheckboxChange(e) {
             const cat = e.target.dataset.categoria;
             const index = parseInt(e.target.dataset.index);
@@ -914,9 +905,6 @@
             }
         }
 
-        // ============================================================
-        // DRAG & DROP
-        // ============================================================
         function handleDragStart(e) {
             if (!editMode) return;
             const item = e.target.closest('.item');
@@ -1060,5 +1048,14 @@
             const btn = document.getElementById('editBtn');
             btn.textContent = editMode ? '✅ Listo' : '✏️ Editar';
             btn.classList.toggle('active', editMode);
-            // Ocultar el formulario de nueva categor
-        
+            if (!editMode) {
+                document.getElementById('addCategoriaTop').classList.remove('show');
+            }
+            render();
+        }
+
+        loadData();
+        render();
+    </script>
+</body>
+</html>
