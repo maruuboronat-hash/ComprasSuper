@@ -1102,4 +1102,20 @@
         function handleReset() {
             if (confirm('¿Reiniciar todos los ítems? (se desmarcarán todos)')) {
                 Object.keys(data).forEach(cat => {
-                    data[cat].forEach(item =>
+                    data[cat].forEach(item => { item.checked = false; });
+                });
+                saveData();
+                render();
+            }
+        }
+
+        function handleEditToggle() {
+            editMode = !editMode;
+            const btn = document.getElementById('editBtn');
+            btn.textContent = editMode ? '✅ Listo' : '✏️ Editar';
+            btn.classList.toggle('active', editMode);
+            render();
+        }
+
+        // ============================================================
+       
