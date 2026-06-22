@@ -88,27 +88,12 @@
             background: #229954;
         }
 
-        .categoria-wrapper {
-            transition: all 0.3s ease;
-        }
-
-        .categoria-wrapper.dragging-cat {
-            opacity: 0.3;
-            transform: scale(0.95);
-        }
-
-        .categoria-wrapper.drag-over-cat {
-            padding-top: 20px;
-            border-top: 4px solid #3498db;
-        }
-
         .categoria {
             background: white;
             border-radius: 16px;
             padding: 15px;
             margin-bottom: 20px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            transition: all 0.3s ease;
         }
 
         .categoria-header {
@@ -118,31 +103,6 @@
             margin-bottom: 12px;
             padding-bottom: 8px;
             border-bottom: 2px solid #ecf0f1;
-        }
-
-        .categoria-header-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex: 1;
-        }
-
-        .cat-drag-handle {
-            color: #bdc3c7;
-            font-size: 20px;
-            cursor: grab;
-            display: none;
-            user-select: none;
-            padding: 4px;
-            touch-action: none;
-        }
-
-        .cat-drag-handle.show {
-            display: block;
-        }
-
-        .cat-drag-handle:active {
-            cursor: grabbing;
         }
 
         .categoria-titulo {
@@ -158,20 +118,7 @@
             font-size: 24px;
         }
 
-        .categoria-count {
-            font-size: 14px;
-            color: #7f8c8d;
-            font-weight: 400;
-            margin-left: 8px;
-        }
-
-        .categoria-actions {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .cat-add-btn {
+        .add-item-btn {
             background: #2ecc71;
             color: white;
             border: none;
@@ -187,35 +134,11 @@
             touch-action: manipulation;
         }
 
-        .cat-add-btn.show {
+        .add-item-btn.show {
             display: flex;
         }
 
-        .cat-add-btn:active {
-            transform: scale(0.9);
-        }
-
-        .cat-delete-btn {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            font-size: 18px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            touch-action: manipulation;
-        }
-
-        .cat-delete-btn.show {
-            display: flex;
-        }
-
-        .cat-delete-btn:active {
+        .add-item-btn:active {
             transform: scale(0.9);
         }
 
@@ -241,7 +164,7 @@
             background: #ebf5fb;
         }
 
-        .item-drag-handle {
+        .drag-handle {
             color: #bdc3c7;
             font-size: 18px;
             cursor: grab;
@@ -251,11 +174,11 @@
             touch-action: none;
         }
 
-        .item-drag-handle.show {
+        .drag-handle.show {
             display: block;
         }
 
-        .item-drag-handle:active {
+        .drag-handle:active {
             cursor: grabbing;
         }
 
@@ -311,8 +234,6 @@
             transition: all 0.2s;
             touch-action: manipulation;
             font-weight: bold;
-            background: transparent;
-            border: none;
         }
 
         .item-delete.show {
@@ -324,14 +245,14 @@
             transform: scale(0.9);
         }
 
-        .add-item-container {
+        .add-item-input-container {
             display: none;
             margin-top: 12px;
             gap: 10px;
             align-items: center;
         }
 
-        .add-item-container.show {
+        .add-item-input-container.show {
             display: flex;
         }
 
@@ -368,6 +289,25 @@
             transform: scale(0.95);
         }
 
+        .item-count {
+            font-size: 14px;
+            color: #7f8c8d;
+            font-weight: 400;
+        }
+
+        /* Modo edición */
+        .edit-mode .item-delete {
+            display: block !important;
+        }
+
+        .edit-mode .drag-handle {
+            display: block !important;
+        }
+
+        .edit-mode .add-item-btn {
+            display: flex !important;
+        }
+
         .empty-message {
             text-align: center;
             color: #bdc3c7;
@@ -375,80 +315,7 @@
             font-size: 16px;
         }
 
-        /* Agregar categoría */
-        .add-categoria-container {
-            background: white;
-            border-radius: 16px;
-            padding: 18px;
-            margin-top: 16px;
-            border: 2px dashed #bdc3c7;
-            transition: all 0.3s;
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .add-categoria-container:focus-within {
-            border-color: #3498db;
-            background: #f8f9fa;
-        }
-
-        .add-categoria-input {
-            flex: 1;
-            min-width: 150px;
-            padding: 10px 14px;
-            border: 2px solid #bdc3c7;
-            border-radius: 10px;
-            font-size: 15px;
-            outline: none;
-            transition: border-color 0.3s;
-            background: white;
-            font-family: inherit;
-        }
-
-        .add-categoria-input:focus {
-            border-color: #3498db;
-        }
-
-        .add-categoria-select {
-            padding: 10px 14px;
-            border: 2px solid #bdc3c7;
-            border-radius: 10px;
-            font-size: 15px;
-            outline: none;
-            background: white;
-            font-family: inherit;
-            cursor: pointer;
-            min-width: 120px;
-        }
-
-        .add-categoria-select:focus {
-            border-color: #3498db;
-        }
-
-        .btn-add-categoria {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            touch-action: manipulation;
-            white-space: nowrap;
-        }
-
-        .btn-add-categoria:active {
-            transform: scale(0.95);
-        }
-
-        .btn-add-categoria:hover {
-            background: #2980b9;
-        }
-
+        /* Responsive */
         @media (max-width: 600px) {
             body {
                 padding: 12px;
@@ -486,27 +353,21 @@
                 min-width: 20px;
             }
 
-            .item-drag-handle {
+            .drag-handle {
                 font-size: 16px;
             }
+        }
 
-            .add-categoria-container {
-                padding: 14px;
-                flex-direction: column;
-            }
-
-            .add-categoria-input,
-            .add-categoria-select {
-                width: 100%;
-                min-width: unset;
-            }
+        /* Toque feedback */
+        .item:active {
+            background: #f0f0f0;
         }
     </style>
 </head>
 <body>
     <h1>
         🛒 Lista de Compras
-        <span class="categoria-count" id="totalItems">0 items</span>
+        <span class="item-count" id="totalItems">0 items</span>
     </h1>
 
     <div class="header-buttons">
@@ -515,28 +376,6 @@
     </div>
 
     <div id="listaContainer"></div>
-
-    <!-- Agregar categoría -->
-    <div class="add-categoria-container" id="addCategoriaContainer">
-        <input type="text" class="add-categoria-input" id="addCategoriaInput" placeholder="Nueva categoría...">
-        <select class="add-categoria-select" id="addCategoriaIcon">
-            <option value="🛒">🛒 General</option>
-            <option value="🥬">🥬 Verduras</option>
-            <option value="🧀">🧀 Lácteos</option>
-            <option value="🥫">🥫 Almacén</option>
-            <option value="🍞">🍞 Panadería</option>
-            <option value="🥩">🥩 Carnes</option>
-            <option value="❄️">❄️ Congelados</option>
-            <option value="☕">☕ Desayuno</option>
-            <option value="🧹">🧹 Limpieza</option>
-            <option value="🧴">🧴 Higiene</option>
-            <option value="🥤">🥤 Bebidas</option>
-            <option value="🍕">🍕 Comida</option>
-            <option value="🧁">🧁 Dulces</option>
-            <option value="🌿">🌿 Salud</option>
-        </select>
-        <button class="btn-add-categoria" id="addCategoriaBtn">➕ Agregar</button>
-    </div>
 
     <script>
         // ============================================================
@@ -608,50 +447,51 @@
         // ============================================================
         // ESTADO
         // ============================================================
-        let categories = [];
         let data = {};
         let editMode = false;
         let dragData = null;
         let dragOverData = null;
-        let catDragData = null;
-        let catDragOverData = null;
 
+        // Cargar desde localStorage
         function loadData() {
-            const saved = localStorage.getItem('listaComprasPro');
+            const saved = localStorage.getItem('listaCompras');
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
-                    if (parsed.categories && parsed.data) {
-                        categories = parsed.categories;
-                        data = parsed.data;
-                        // Asegurar items iniciales
-                        categories.forEach(cat => {
-                            if (!data[cat.id]) {
-                                data[cat.id] = cat.items.map(item => ({ text: item, checked: false }));
-                            } else {
-                                const existingTexts = data[cat.id].map(i => i.text);
-                                cat.items.forEach(item => {
-                                    if (!existingTexts.includes(item)) {
-                                        data[cat.id].push({ text: item, checked: false });
-                                    }
-                                });
-                            }
-                        });
-                        saveData();
+                    // Asegurar que todas las categorías existan
+                    let allItemsPresent = true;
+                    categoriasData.forEach(cat => {
+                        if (!parsed[cat.id]) {
+                            allItemsPresent = false;
+                            parsed[cat.id] = cat.items.map(item => ({ text: item, checked: false }));
+                        } else {
+                            // Verificar que todos los items iniciales estén
+                            const existingTexts = parsed[cat.id].map(i => i.text);
+                            cat.items.forEach(item => {
+                                if (!existingTexts.includes(item)) {
+                                    parsed[cat.id].push({ text: item, checked: false });
+                                }
+                            });
+                        }
+                    });
+                    if (allItemsPresent) {
+                        data = parsed;
                         return;
                     }
-                } catch (e) { console.warn('Error al cargar datos'); }
+                } catch (e) {
+                    console.warn('Error al cargar datos, usando datos iniciales');
+                }
             }
-            categories = JSON.parse(JSON.stringify(categoriasData));
+            // Datos iniciales
             data = {};
-            categories.forEach(cat => {
+            categoriasData.forEach(cat => {
                 data[cat.id] = cat.items.map(item => ({ text: item, checked: false }));
             });
             saveData();
         }
 
         function saveData() {
-            localStorage.setItem('listaComprasPro', JSON.stringify({ categories, data }));
+            localStorage.setItem('listaCompras', JSON.stringify(data));
             updateTotalCount();
         }
 
@@ -661,16 +501,6 @@
             document.getElementById('totalItems').textContent = total + ' items';
         }
 
-        function getCategoryName(catId) {
-            const cat = categories.find(c => c.id === catId);
-            return cat ? cat.nombre : catId;
-        }
-
-        function getCategoryEmoji(catId) {
-            const cat = categories.find(c => c.id === catId);
-            return cat ? cat.emoji : '🛒';
-        }
-
         // ============================================================
         // RENDER
         // ============================================================
@@ -678,13 +508,9 @@
             const container = document.getElementById('listaContainer');
             container.innerHTML = '';
 
-            categories.forEach((cat, catIndex) => {
+            categoriasData.forEach(cat => {
                 const items = data[cat.id] || [];
-
-                const wrapper = document.createElement('div');
-                wrapper.className = 'categoria-wrapper';
-                wrapper.dataset.categoriaId = cat.id;
-                wrapper.draggable = editMode;
+                const checkedCount = items.filter(i => i.checked).length;
 
                 const div = document.createElement('div');
                 div.className = 'categoria';
@@ -692,40 +518,34 @@
 
                 div.innerHTML = `
                     <div class="categoria-header">
-                        <div class="categoria-header-left">
-                            <span class="cat-drag-handle ${editMode ? 'show' : ''}">⠿</span>
-                            <span class="categoria-titulo">
-                                <span class="emoji">${cat.emoji}</span>
-                                ${cat.nombre}
-                                <span class="categoria-count">(${items.length})</span>
-                            </span>
+                        <div class="categoria-titulo">
+                            <span class="emoji">${cat.emoji}</span>
+                            ${cat.nombre}
+                            <span class="item-count">(${items.length})</span>
                         </div>
-                        <div class="categoria-actions">
-                            <button class="cat-add-btn ${editMode ? 'show' : ''}" data-categoria-id="${cat.id}">+</button>
-                            <button class="cat-delete-btn ${editMode ? 'show' : ''}" data-categoria-id="${cat.id}">✕</button>
-                        </div>
+                        <button class="add-item-btn ${editMode ? 'show' : ''}" data-categoria="${cat.id}">+</button>
                     </div>
-                    <div class="items-container" data-categoria-id="${cat.id}">
+                    <div class="items-container" data-categoria="${cat.id}">
                         ${items.length === 0 ? '<div class="empty-message">Sin items</div>' : ''}
                         ${items.map((item, index) => `
-                            <div class="item" data-categoria-id="${cat.id}" data-index="${index}" draggable="${editMode}">
-                                <span class="item-drag-handle ${editMode ? 'show' : ''}">⠿</span>
-                                <input type="checkbox" class="item-checkbox" ${item.checked ? 'checked' : ''} data-categoria-id="${cat.id}" data-index="${index}">
+                            <div class="item" data-categoria="${cat.id}" data-index="${index}" draggable="${editMode}">
+                                <span class="drag-handle ${editMode ? 'show' : ''}">⠿</span>
+                                <input type="checkbox" class="item-checkbox" ${item.checked ? 'checked' : ''} data-categoria="${cat.id}" data-index="${index}">
                                 <span class="item-text ${item.checked ? 'checked' : ''}">${item.text}</span>
-                                <button class="item-delete ${editMode ? 'show' : ''}" data-categoria-id="${cat.id}" data-index="${index}">✕</button>
+                                <span class="item-delete ${editMode ? 'show' : ''}" data-categoria="${cat.id}" data-index="${index}">✕</span>
                             </div>
                         `).join('')}
                     </div>
-                    <div class="add-item-container ${editMode ? 'show' : ''}" data-categoria-id="${cat.id}">
+                    <div class="add-item-input-container ${editMode ? 'show' : ''}" data-categoria="${cat.id}">
                         <input type="text" class="add-item-input" placeholder="Nuevo item...">
-                        <button class="add-item-confirm" data-categoria-id="${cat.id}">Agregar</button>
+                        <button class="add-item-confirm" data-categoria="${cat.id}">Agregar</button>
                     </div>
                 `;
 
-                wrapper.appendChild(div);
-                container.appendChild(wrapper);
+                container.appendChild(div);
             });
 
+            // Event listeners
             attachEvents();
             updateTotalCount();
         }
@@ -740,35 +560,31 @@
                 cb.addEventListener('change', handleCheckboxChange);
             });
 
-            // Eliminar items
+            // Botones eliminar
             document.querySelectorAll('.item-delete').forEach(btn => {
-                btn.removeEventListener('click', handleItemDelete);
-                btn.addEventListener('click', handleItemDelete);
+                btn.removeEventListener('click', handleDelete);
+                btn.addEventListener('click', handleDelete);
             });
 
-            // Agregar items
-            document.querySelectorAll('.cat-add-btn').forEach(btn => {
+            // Botones agregar (+)
+            document.querySelectorAll('.add-item-btn').forEach(btn => {
                 btn.removeEventListener('click', handleAddBtnClick);
                 btn.addEventListener('click', handleAddBtnClick);
             });
 
+            // Botones confirmar agregar
             document.querySelectorAll('.add-item-confirm').forEach(btn => {
                 btn.removeEventListener('click', handleAddConfirm);
                 btn.addEventListener('click', handleAddConfirm);
             });
 
+            // Inputs de agregar - Enter
             document.querySelectorAll('.add-item-input').forEach(input => {
                 input.removeEventListener('keydown', handleAddInputKeydown);
                 input.addEventListener('keydown', handleAddInputKeydown);
             });
 
-            // Eliminar categoría
-            document.querySelectorAll('.cat-delete-btn').forEach(btn => {
-                btn.removeEventListener('click', handleCategoryDelete);
-                btn.addEventListener('click', handleCategoryDelete);
-            });
-
-            // Drag & Drop items
+            // Drag & Drop
             if (editMode) {
                 document.querySelectorAll('.item').forEach(item => {
                     item.removeEventListener('dragstart', handleDragStart);
@@ -782,45 +598,27 @@
                     item.addEventListener('dragleave', handleDragLeave);
                     item.addEventListener('drop', handleDrop);
                 });
-
-                // Drag & Drop categorías
-                document.querySelectorAll('.categoria-wrapper').forEach(wrapper => {
-                    wrapper.removeEventListener('dragstart', handleCatDragStart);
-                    wrapper.removeEventListener('dragend', handleCatDragEnd);
-                    wrapper.removeEventListener('dragover', handleCatDragOver);
-                    wrapper.removeEventListener('dragleave', handleCatDragLeave);
-                    wrapper.removeEventListener('drop', handleCatDrop);
-                    wrapper.addEventListener('dragstart', handleCatDragStart);
-                    wrapper.addEventListener('dragend', handleCatDragEnd);
-                    wrapper.addEventListener('dragover', handleCatDragOver);
-                    wrapper.addEventListener('dragleave', handleCatDragLeave);
-                    wrapper.addEventListener('drop', handleCatDrop);
-                });
             }
 
-            // Botones principales
+            // Botón Reiniciar
             document.getElementById('resetBtn').removeEventListener('click', handleReset);
             document.getElementById('resetBtn').addEventListener('click', handleReset);
 
+            // Botón Editar
             document.getElementById('editBtn').removeEventListener('click', handleEditToggle);
             document.getElementById('editBtn').addEventListener('click', handleEditToggle);
-
-            document.getElementById('addCategoriaBtn').removeEventListener('click', handleAddCategory);
-            document.getElementById('addCategoriaBtn').addEventListener('click', handleAddCategory);
-
-            document.getElementById('addCategoriaInput').removeEventListener('keydown', handleAddCategoryKeydown);
-            document.getElementById('addCategoriaInput').addEventListener('keydown', handleAddCategoryKeydown);
         }
 
         // ============================================================
-        // HANDLERS - ITEMS
+        // HANDLERS
         // ============================================================
         function handleCheckboxChange(e) {
-            const catId = e.target.dataset.categoriaId;
+            const cat = e.target.dataset.categoria;
             const index = parseInt(e.target.dataset.index);
-            if (data[catId] && data[catId][index]) {
-                data[catId][index].checked = e.target.checked;
+            if (data[cat] && data[cat][index]) {
+                data[cat][index].checked = e.target.checked;
                 saveData();
+                // Actualizar visualmente sin re-renderizar todo
                 const textSpan = e.target.closest('.item').querySelector('.item-text');
                 if (textSpan) {
                     textSpan.classList.toggle('checked', e.target.checked);
@@ -829,36 +627,38 @@
             }
         }
 
-        function handleItemDelete(e) {
+        function handleDelete(e) {
             if (!editMode) return;
-            const catId = e.target.dataset.categoriaId;
+            const cat = e.target.dataset.categoria;
             const index = parseInt(e.target.dataset.index);
-            if (data[catId]) {
-                data[catId].splice(index, 1);
+            if (data[cat]) {
+                data[cat].splice(index, 1);
                 saveData();
                 render();
             }
         }
 
         function handleAddBtnClick(e) {
-            const catId = e.target.dataset.categoriaId;
-            const container = e.target.closest('.categoria').querySelector('.add-item-container');
-            const input = container.querySelector('.add-item-input');
-            container.classList.toggle('show');
-            if (container.classList.contains('show')) {
+            const cat = e.target.dataset.categoria;
+            const container = e.target.closest('.categoria');
+            const inputContainer = container.querySelector('.add-item-input-container');
+            const input = inputContainer.querySelector('.add-item-input');
+            inputContainer.classList.toggle('show');
+            if (inputContainer.classList.contains('show')) {
                 input.focus();
             }
         }
 
         function handleAddConfirm(e) {
-            const catId = e.target.dataset.categoriaId;
-            const container = e.target.closest('.categoria').querySelector('.add-item-container');
+            const cat = e.target.dataset.categoria;
+            const container = e.target.closest('.categoria');
             const input = container.querySelector('.add-item-input');
             const text = input.value.trim();
-            if (text && data[catId]) {
-                data[catId].push({ text: text, checked: false });
+            if (text && data[cat]) {
+                data[cat].push({ text: text, checked: false });
                 saveData();
                 render();
+                // Re-enfocar el input después de renderizar
                 setTimeout(() => {
                     const newInput = container.querySelector('.add-item-input');
                     if (newInput) {
@@ -877,67 +677,18 @@
         }
 
         // ============================================================
-        // HANDLERS - CATEGORÍAS
-        // ============================================================
-        function handleCategoryDelete(e) {
-            if (!editMode) return;
-            const catId = e.target.dataset.categoriaId;
-            if (categories.length <= 1) {
-                alert('Debe haber al menos una categoría');
-                return;
-            }
-            if (confirm(`¿Eliminar la categoría "${getCategoryName(catId)}" y todos sus items?`)) {
-                const index = categories.findIndex(c => c.id === catId);
-                if (index !== -1) {
-                    categories.splice(index, 1);
-                    delete data[catId];
-                    saveData();
-                    render();
-                }
-            }
-        }
-
-        function handleAddCategory() {
-            const input = document.getElementById('addCategoriaInput');
-            const select = document.getElementById('addCategoriaIcon');
-            const name = input.value.trim();
-            const emoji = select.value;
-            if (!name) {
-                alert('Ingresa un nombre para la categoría');
-                return;
-            }
-            const id = name.toLowerCase().replace(/[^a-z0-9]/g, '');
-            if (categories.find(c => c.id === id)) {
-                alert('Ya existe una categoría con ese nombre');
-                return;
-            }
-            categories.push({ id, emoji, nombre: name, items: [] });
-            data[id] = [];
-            saveData();
-            render();
-            input.value = '';
-            input.focus();
-        }
-
-        function handleAddCategoryKeydown(e) {
-            if (e.key === 'Enter') {
-                document.getElementById('addCategoriaBtn').click();
-            }
-        }
-
-        // ============================================================
-        // HANDLERS - DRAG & DROP ITEMS
+        // DRAG & DROP
         // ============================================================
         function handleDragStart(e) {
             if (!editMode) return;
             const item = e.target.closest('.item');
             if (!item) return;
-            const catId = item.dataset.categoriaId;
+            const cat = item.dataset.categoria;
             const index = parseInt(item.dataset.index);
-            dragData = { catId, index };
+            dragData = { cat, index };
             item.classList.add('dragging');
             e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/plain', `${catId}|${index}`);
+            e.dataTransfer.setData('text/plain', `${cat}|${index}`);
             setTimeout(() => { item.style.opacity = '0.4'; }, 0);
         }
 
@@ -957,12 +708,12 @@
             e.dataTransfer.dropEffect = 'move';
             const targetItem = e.target.closest('.item');
             if (!targetItem || !dragData) return;
-            const catId = targetItem.dataset.categoriaId;
+            const cat = targetItem.dataset.categoria;
             const index = parseInt(targetItem.dataset.index);
-            if (catId === dragData.catId && index !== dragData.index) {
+            if (cat === dragData.cat && index !== dragData.index) {
                 document.querySelectorAll('.item.drag-over').forEach(el => el.classList.remove('drag-over'));
                 targetItem.classList.add('drag-over');
-                dragOverData = { catId, index };
+                dragOverData = { cat, index };
             }
         }
 
@@ -977,11 +728,11 @@
             e.preventDefault();
             const targetItem = e.target.closest('.item');
             if (!targetItem || !dragData || !dragOverData) return;
-            if (dragData.catId === dragOverData.catId && dragData.index !== dragOverData.index) {
-                const catId = dragData.catId;
+            if (dragData.cat === dragOverData.cat && dragData.index !== dragOverData.index) {
+                const cat = dragData.cat;
                 const from = dragData.index;
                 const to = dragOverData.index;
-                const items = data[catId];
+                const items = data[cat];
                 if (items) {
                     const [moved] = items.splice(from, 1);
                     items.splice(to, 0, moved);
@@ -995,77 +746,12 @@
         }
 
         // ============================================================
-        // HANDLERS - DRAG & DROP CATEGORÍAS
-        // ============================================================
-        function handleCatDragStart(e) {
-            if (!editMode) return;
-            const wrapper = e.target.closest('.categoria-wrapper');
-            if (!wrapper) return;
-            const catId = wrapper.dataset.categoriaId;
-            catDragData = { catId };
-            wrapper.classList.add('dragging-cat');
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/plain', catId);
-            setTimeout(() => { wrapper.style.opacity = '0.4'; }, 0);
-        }
-
-        function handleCatDragEnd(e) {
-            const wrapper = e.target.closest('.categoria-wrapper');
-            if (wrapper) {
-                wrapper.classList.remove('dragging-cat');
-                wrapper.style.opacity = '1';
-            }
-            document.querySelectorAll('.categoria-wrapper.drag-over-cat').forEach(el => el.classList.remove('drag-over-cat'));
-            catDragData = null;
-            catDragOverData = null;
-        }
-
-        function handleCatDragOver(e) {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-            const targetWrapper = e.target.closest('.categoria-wrapper');
-            if (!targetWrapper || !catDragData) return;
-            const catId = targetWrapper.dataset.categoriaId;
-            if (catId !== catDragData.catId) {
-                document.querySelectorAll('.categoria-wrapper.drag-over-cat').forEach(el => el.classList.remove('drag-over-cat'));
-                targetWrapper.classList.add('drag-over-cat');
-                catDragOverData = { catId };
-            }
-        }
-
-        function handleCatDragLeave(e) {
-            const targetWrapper = e.target.closest('.categoria-wrapper');
-            if (targetWrapper) {
-                targetWrapper.classList.remove('drag-over-cat');
-            }
-        }
-
-        function handleCatDrop(e) {
-            e.preventDefault();
-            const targetWrapper = e.target.closest('.categoria-wrapper');
-            if (!targetWrapper || !catDragData || !catDragOverData) return;
-            if (catDragData.catId !== catDragOverData.catId) {
-                const fromIndex = categories.findIndex(c => c.id === catDragData.catId);
-                const toIndex = categories.findIndex(c => c.id === catDragOverData.catId);
-                if (fromIndex !== -1 && toIndex !== -1) {
-                    const [moved] = categories.splice(fromIndex, 1);
-                    categories.splice(toIndex, 0, moved);
-                    saveData();
-                    render();
-                }
-            }
-            targetWrapper.classList.remove('drag-over-cat');
-            catDragData = null;
-            catDragOverData = null;
-        }
-
-        // ============================================================
         // BOTONES PRINCIPALES
         // ============================================================
         function handleReset() {
             if (confirm('¿Reiniciar todos los ítems? (se desmarcarán todos)')) {
-                Object.keys(data).forEach(catId => {
-                    data[catId].forEach(item => { item.checked = false; });
+                Object.keys(data).forEach(cat => {
+                    data[cat].forEach(item => { item.checked = false; });
                 });
                 saveData();
                 render();
@@ -1075,13 +761,8 @@
         function handleEditToggle() {
             editMode = !editMode;
             const btn = document.getElementById('editBtn');
-            if (editMode) {
-                btn.textContent = '✅ Listo';
-                btn.classList.add('active');
-            } else {
-                btn.textContent = '✏️ Editar';
-                btn.classList.remove('active');
-            }
+            btn.textContent = editMode ? '🔒 Salir' : '✏️ Editar';
+            btn.classList.toggle('active', editMode);
             render();
         }
 
