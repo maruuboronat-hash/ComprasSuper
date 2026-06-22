@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f8f7ff;padding:20px;padding-bottom:100px;max-width:800px;margin:0 auto;min-height:100vh;color:#1a1730}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f8f7ff;padding:20px;padding-bottom:100px;max-width:800px;margin:0 auto;min-height:100vh;color:#1a1730;overflow-y:auto;-webkit-overflow-scrolling:touch}
 :root{
   --violet:#6c47ff;
   --violet-light:#ede9ff;
@@ -45,14 +45,14 @@ h1 .ti{font-size:22px;color:var(--violet)}
 .btn-add-ok:hover{background:var(--violet-dark);transform:translateY(-1px)}
 .btn-add-ok:active{transform:scale(0.97)}
 
-.categoria-wrapper{transition:var(--transition)}
+.categoria-wrapper{transition:var(--transition);touch-action:pan-y}
 .categoria-wrapper.dragging-cat{opacity:0.3;transform:scale(0.97)}
 .categoria-wrapper.drag-over-cat{padding-top:16px;border-top:2px solid var(--violet)}
 
-.categoria{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:16px;margin-bottom:14px;backdrop-filter:blur(12px);box-shadow:var(--shadow);transition:var(--transition)}
+.categoria{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:16px;margin-bottom:14px;backdrop-filter:blur(12px);box-shadow:var(--shadow);transition:var(--transition);touch-action:pan-y}
 .categoria:hover{box-shadow:0 4px 24px rgba(108,71,255,0.1)}
 
-.categoria-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid rgba(108,71,255,0.08);cursor:pointer;user-select:none}
+.categoria-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid rgba(108,71,255,0.08);cursor:pointer;user-select:none;touch-action:manipulation}
 .edit-mode .categoria-header{cursor:default}
 .edit-mode .toggle-icon{display:none}
 .categoria-header-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
@@ -83,10 +83,10 @@ h1 .ti{font-size:22px;color:var(--violet)}
 .icon-btn-danger{color:#c0392b;border-color:rgba(192,57,43,0.15)}
 .icon-btn-danger:hover{background:rgba(192,57,43,0.07);border-color:rgba(192,57,43,0.3)}
 
-.items-container{display:flex;flex-direction:column;gap:2px;overflow:hidden;transition:max-height 0.35s cubic-bezier(.4,0,.2,1),opacity 0.25s ease;max-height:3000px;opacity:1}
+.items-container{display:flex;flex-direction:column;gap:2px;overflow:hidden;transition:max-height 0.35s cubic-bezier(.4,0,.2,1),opacity 0.25s ease;max-height:3000px;opacity:1;touch-action:pan-y}
 .items-container.collapsed{max-height:0;opacity:0;pointer-events:none}
 
-.item{display:flex;align-items:center;padding:9px 8px;border-radius:10px;margin-bottom:2px;transition:var(--transition);gap:10px;touch-action:none}
+.item{display:flex;align-items:center;padding:9px 8px;border-radius:10px;margin-bottom:2px;transition:var(--transition);gap:10px;touch-action:pan-y}
 .item:hover{background:rgba(108,71,255,0.04)}
 .item.dragging{opacity:0.4;background:var(--violet-light)}
 .item.drag-over{border-top:2px solid var(--violet);background:rgba(108,71,255,0.05)}
@@ -132,6 +132,7 @@ h1 .ti{font-size:22px;color:var(--violet)}
   .categoria-titulo{font-size:14px}
   .categoria-titulo-input{font-size:14px}
   .item-text-input{font-size:14px}
+  .cat-drag-handle,.drag-handle{display:none !important}
 }
 </style>
 </head>
@@ -171,6 +172,9 @@ h1 .ti{font-size:22px;color:var(--violet)}
 <div id="listaContainer"></div>
 
 <script>
+// Detectar si es dispositivo táctil
+const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+
 const CAT_ICONS={
   verduleria:'ti-leaf',lacteos:'ti-cheese',almacen:'ti-building-store',
   panaderia:'ti-bread',carnes:'ti-meat',congelados:'ti-snowflake',
@@ -192,6 +196,7 @@ const categoriasData=[
 ];
 
 let categories=[],data={},editMode=false,dragData=null,dragOverData=null,catDragData=null,catDragOverData=null,collapsedCategories={},editingItem=null,editingCat=null;
+let dragEnabled = !isTouchDevice; // En móviles, desactivamos drag
 
 function loadData(){
   const saved=localStorage.getItem('listaComprasV2');
@@ -268,13 +273,13 @@ function render(){
     const wrapper=document.createElement('div');
     wrapper.className='categoria-wrapper';
     wrapper.dataset.categoriaId=cat.id;
-    wrapper.draggable=editMode;
+    wrapper.draggable=editMode && dragEnabled;
     const div=document.createElement('div');
     div.className='categoria'+(editMode?' edit-mode':'');
     div.innerHTML=`
 <div class="categoria-header" data-categoria-id="${cat.id}">
   <div class="categoria-header-left">
-    <span class="cat-drag-handle ${editMode?'show':''}" aria-hidden="true"><i class="ti ti-grip-vertical"></i></span>
+    <span class="cat-drag-handle ${editMode && dragEnabled ? 'show' : ''}" aria-hidden="true"><i class="ti ti-grip-vertical"></i></span>
     <div class="cat-icon" aria-hidden="true"><i class="ti ${iconClass}"></i></div>
     ${isEditingCat && editMode ? 
       `<input type="text" class="categoria-titulo-input" data-categoria-id="${cat.id}" value="${cat.nombre}" placeholder="Nombre...">` :
@@ -293,8 +298,8 @@ function render(){
   ${items.map((item,index)=>{
     const isEditing=editingItem && editingItem.catId===cat.id && editingItem.index===index;
     return `
-    <div class="item" data-categoria="${cat.id}" data-index="${index}" draggable="${editMode}">
-      <span class="drag-handle ${editMode?'show':''}" aria-hidden="true"><i class="ti ti-grip-vertical"></i></span>
+    <div class="item" data-categoria="${cat.id}" data-index="${index}" draggable="${editMode && dragEnabled}">
+      <span class="drag-handle ${editMode && dragEnabled ? 'show' : ''}" aria-hidden="true"><i class="ti ti-grip-vertical"></i></span>
       <input type="checkbox" class="item-checkbox" ${item.checked?'checked':''} data-categoria="${cat.id}" data-index="${index}" aria-label="${item.text}">
       ${isEditing && editMode ? 
         `<input type="text" class="item-text-input" data-categoria="${cat.id}" data-index="${index}" value="${item.text}" placeholder="Nombre...">` :
@@ -320,12 +325,27 @@ function render(){
 }
 
 function attachEvents(){
-  // Click en header para colapsar
+  // Click en header para colapsar (mejorado para móviles)
   document.querySelectorAll('.categoria-header').forEach(h=>{
-    h.onclick=e=>{
+    h.ontouchend = function(e) {
       if(editMode)return;
       if(e.target.closest('.categoria-actions'))return;
-      toggleCategory(h.dataset.categoriaId);
+      // Prevenir que el toque se convierta en scroll
+      if(!h._touchStartTime || (Date.now() - h._touchStartTime) < 200) {
+        toggleCategory(h.dataset.categoriaId);
+      }
+      h._touchStartTime = null;
+    };
+    h.ontouchstart = function(e) {
+      h._touchStartTime = Date.now();
+    };
+    h.onclick = function(e) {
+      if(editMode)return;
+      if(e.target.closest('.categoria-actions'))return;
+      // En desktop, click normal
+      if(!('ontouchstart' in window)) {
+        toggleCategory(h.dataset.categoriaId);
+      }
     };
   });
 
@@ -462,8 +482,8 @@ function attachEvents(){
     inp.onkeydown=e=>{if(e.key==='Enter')inp.closest('.categoria').querySelector('.add-item-confirm').click();};
   });
 
-  // Drag & Drop Items
-  if(editMode){
+  // Drag & Drop Items (solo si no es táctil)
+  if(editMode && dragEnabled){
     document.querySelectorAll('.item').forEach(item=>{
       item.ondragstart=e=>{
         if(!editMode)return;
@@ -494,7 +514,7 @@ function attachEvents(){
       };
     });
 
-    // Drag & Drop Categorías
+    // Drag & Drop Categorías (solo si no es táctil)
     document.querySelectorAll('.categoria-wrapper').forEach(w=>{
       w.ondragstart=e=>{
         if(!editMode)return;
