@@ -88,6 +88,20 @@
             background: #229954;
         }
 
+        .categoria-wrapper {
+            transition: all 0.3s ease;
+        }
+
+        .categoria-wrapper.dragging-cat {
+            opacity: 0.3;
+            transform: scale(0.95);
+        }
+
+        .categoria-wrapper.drag-over-cat {
+            padding-top: 20px;
+            border-top: 4px solid #3498db;
+        }
+
         .categoria {
             background: white;
             border-radius: 16px;
@@ -105,6 +119,31 @@
             border-bottom: 2px solid #ecf0f1;
         }
 
+        .categoria-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .cat-drag-handle {
+            color: #bdc3c7;
+            font-size: 20px;
+            cursor: grab;
+            display: none;
+            user-select: none;
+            padding: 4px;
+            touch-action: none;
+        }
+
+        .cat-drag-handle.show {
+            display: block;
+        }
+
+        .cat-drag-handle:active {
+            cursor: grabbing;
+        }
+
         .categoria-titulo {
             font-size: 20px;
             font-weight: 700;
@@ -116,6 +155,12 @@
 
         .categoria-titulo .emoji {
             font-size: 24px;
+        }
+
+        .categoria-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
         }
 
         .add-item-btn {
@@ -139,6 +184,30 @@
         }
 
         .add-item-btn:active {
+            transform: scale(0.9);
+        }
+
+        .cat-delete-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+        }
+
+        .cat-delete-btn.show {
+            display: flex;
+        }
+
+        .cat-delete-btn:active {
             transform: scale(0.9);
         }
 
@@ -234,6 +303,8 @@
             transition: all 0.2s;
             touch-action: manipulation;
             font-weight: bold;
+            background: transparent;
+            border: none;
         }
 
         .item-delete.show {
@@ -308,11 +379,93 @@
             display: flex !important;
         }
 
+        .edit-mode .cat-drag-handle {
+            display: block !important;
+        }
+
+        .edit-mode .cat-delete-btn {
+            display: flex !important;
+        }
+
         .empty-message {
             text-align: center;
             color: #bdc3c7;
             padding: 20px;
             font-size: 16px;
+        }
+
+        /* Agregar categoría */
+        .add-categoria-container {
+            background: white;
+            border-radius: 16px;
+            padding: 18px;
+            margin-top: 16px;
+            border: 2px dashed #bdc3c7;
+            transition: all 0.3s;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .add-categoria-container:focus-within {
+            border-color: #3498db;
+            background: #f8f9fa;
+        }
+
+        .add-categoria-input {
+            flex: 1;
+            min-width: 150px;
+            padding: 10px 14px;
+            border: 2px solid #bdc3c7;
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.3s;
+            background: white;
+            font-family: inherit;
+        }
+
+        .add-categoria-input:focus {
+            border-color: #3498db;
+        }
+
+        .add-categoria-select {
+            padding: 10px 14px;
+            border: 2px solid #bdc3c7;
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+            background: white;
+            font-family: inherit;
+            cursor: pointer;
+            min-width: 120px;
+        }
+
+        .add-categoria-select:focus {
+            border-color: #3498db;
+        }
+
+        .btn-add-categoria {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            touch-action: manipulation;
+            white-space: nowrap;
+        }
+
+        .btn-add-categoria:active {
+            transform: scale(0.95);
+        }
+
+        .btn-add-categoria:hover {
+            background: #2980b9;
         }
 
         /* Responsive */
@@ -356,6 +509,17 @@
             .drag-handle {
                 font-size: 16px;
             }
+
+            .add-categoria-container {
+                padding: 14px;
+                flex-direction: column;
+            }
+
+            .add-categoria-input,
+            .add-categoria-select {
+                width: 100%;
+                min-width: unset;
+            }
         }
 
         /* Toque feedback */
@@ -376,6 +540,28 @@
     </div>
 
     <div id="listaContainer"></div>
+
+    <!-- Agregar categoría -->
+    <div class="add-categoria-container" id="addCategoriaContainer">
+        <input type="text" class="add-categoria-input" id="addCategoriaInput" placeholder="Nueva categoría...">
+        <select class="add-categoria-select" id="addCategoriaIcon">
+            <option value="🛒">🛒 General</option>
+            <option value="🥬">🥬 Verduras</option>
+            <option value="🧀">🧀 Lácteos</option>
+            <option value="🥫">🥫 Almacén</option>
+            <option value="🍞">🍞 Panadería</option>
+            <option value="🥩">🥩 Carnes</option>
+            <option value="❄️">❄️ Congelados</option>
+            <option value="☕">☕ Desayuno</option>
+            <option value="🧹">🧹 Limpieza</option>
+            <option value="🧴">🧴 Higiene</option>
+            <option value="🥤">🥤 Bebidas</option>
+            <option value="🍕">🍕 Comida</option>
+            <option value="🧁">🧁 Dulces</option>
+            <option value="🌿">🌿 Salud</option>
+        </select>
+        <button class="btn-add-categoria" id="addCategoriaBtn">➕ Agregar</button>
+    </div>
 
     <script>
         // ============================================================
@@ -447,35 +633,38 @@
         // ============================================================
         // ESTADO
         // ============================================================
+        let categories = [];
         let data = {};
         let editMode = false;
         let dragData = null;
         let dragOverData = null;
+        let catDragData = null;
+        let catDragOverData = null;
 
         // Cargar desde localStorage
         function loadData() {
-            const saved = localStorage.getItem('listaCompras');
+            const saved = localStorage.getItem('listaComprasPro');
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
-                    // Asegurar que todas las categorías existan
-                    let allItemsPresent = true;
-                    categoriasData.forEach(cat => {
-                        if (!parsed[cat.id]) {
-                            allItemsPresent = false;
-                            parsed[cat.id] = cat.items.map(item => ({ text: item, checked: false }));
-                        } else {
-                            // Verificar que todos los items iniciales estén
-                            const existingTexts = parsed[cat.id].map(i => i.text);
-                            cat.items.forEach(item => {
-                                if (!existingTexts.includes(item)) {
-                                    parsed[cat.id].push({ text: item, checked: false });
-                                }
-                            });
-                        }
-                    });
-                    if (allItemsPresent) {
-                        data = parsed;
+                    if (parsed.categories && parsed.data) {
+                        categories = parsed.categories;
+                        data = parsed.data;
+                        // Asegurar que todas las categorías existan
+                        categories.forEach(cat => {
+                            if (!data[cat.id]) {
+                                data[cat.id] = cat.items.map(item => ({ text: item, checked: false }));
+                            } else {
+                                // Verificar que todos los items iniciales estén
+                                const existingTexts = data[cat.id].map(i => i.text);
+                                cat.items.forEach(item => {
+                                    if (!existingTexts.includes(item)) {
+                                        data[cat.id].push({ text: item, checked: false });
+                                    }
+                                });
+                            }
+                        });
+                        saveData();
                         return;
                     }
                 } catch (e) {
@@ -483,15 +672,16 @@
                 }
             }
             // Datos iniciales
+            categories = JSON.parse(JSON.stringify(categoriasData));
             data = {};
-            categoriasData.forEach(cat => {
+            categories.forEach(cat => {
                 data[cat.id] = cat.items.map(item => ({ text: item, checked: false }));
             });
             saveData();
         }
 
         function saveData() {
-            localStorage.setItem('listaCompras', JSON.stringify(data));
+            localStorage.setItem('listaComprasPro', JSON.stringify({ categories, data }));
             updateTotalCount();
         }
 
@@ -501,6 +691,16 @@
             document.getElementById('totalItems').textContent = total + ' items';
         }
 
+        function getCategoryName(catId) {
+            const cat = categories.find(c => c.id === catId);
+            return cat ? cat.nombre : catId;
+        }
+
+        function getCategoryEmoji(catId) {
+            const cat = categories.find(c => c.id === catId);
+            return cat ? cat.emoji : '🛒';
+        }
+
         // ============================================================
         // RENDER
         // ============================================================
@@ -508,9 +708,13 @@
             const container = document.getElementById('listaContainer');
             container.innerHTML = '';
 
-            categoriasData.forEach(cat => {
+            categories.forEach((cat, catIndex) => {
                 const items = data[cat.id] || [];
-                const checkedCount = items.filter(i => i.checked).length;
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'categoria-wrapper';
+                wrapper.dataset.categoriaId = cat.id;
+                wrapper.draggable = editMode;
 
                 const div = document.createElement('div');
                 div.className = 'categoria';
@@ -518,12 +722,18 @@
 
                 div.innerHTML = `
                     <div class="categoria-header">
-                        <div class="categoria-titulo">
-                            <span class="emoji">${cat.emoji}</span>
-                            ${cat.nombre}
-                            <span class="item-count">(${items.length})</span>
+                        <div class="categoria-header-left">
+                            <span class="cat-drag-handle ${editMode ? 'show' : ''}">⠿</span>
+                            <span class="categoria-titulo">
+                                <span class="emoji">${cat.emoji}</span>
+                                ${cat.nombre}
+                                <span class="item-count">(${items.length})</span>
+                            </span>
                         </div>
-                        <button class="add-item-btn ${editMode ? 'show' : ''}" data-categoria="${cat.id}">+</button>
+                        <div class="categoria-actions">
+                            <button class="add-item-btn ${editMode ? 'show' : ''}" data-categoria="${cat.id}">+</button>
+                            <button class="cat-delete-btn ${editMode ? 'show' : ''}" data-categoria="${cat.id}">✕</button>
+                        </div>
                     </div>
                     <div class="items-container" data-categoria="${cat.id}">
                         ${items.length === 0 ? '<div class="empty-message">Sin items</div>' : ''}
@@ -542,7 +752,8 @@
                     </div>
                 `;
 
-                container.appendChild(div);
+                wrapper.appendChild(div);
+                container.appendChild(wrapper);
             });
 
             // Event listeners
@@ -560,31 +771,37 @@
                 cb.addEventListener('change', handleCheckboxChange);
             });
 
-            // Botones eliminar
+            // Botones eliminar items
             document.querySelectorAll('.item-delete').forEach(btn => {
                 btn.removeEventListener('click', handleDelete);
                 btn.addEventListener('click', handleDelete);
             });
 
-            // Botones agregar (+)
+            // Botones agregar items (+)
             document.querySelectorAll('.add-item-btn').forEach(btn => {
                 btn.removeEventListener('click', handleAddBtnClick);
                 btn.addEventListener('click', handleAddBtnClick);
             });
 
-            // Botones confirmar agregar
+            // Botones confirmar agregar items
             document.querySelectorAll('.add-item-confirm').forEach(btn => {
                 btn.removeEventListener('click', handleAddConfirm);
                 btn.addEventListener('click', handleAddConfirm);
             });
 
-            // Inputs de agregar - Enter
+            // Inputs de agregar items - Enter
             document.querySelectorAll('.add-item-input').forEach(input => {
                 input.removeEventListener('keydown', handleAddInputKeydown);
                 input.addEventListener('keydown', handleAddInputKeydown);
             });
 
-            // Drag & Drop
+            // Botones eliminar categoría
+            document.querySelectorAll('.cat-delete-btn').forEach(btn => {
+                btn.removeEventListener('click', handleCategoryDelete);
+                btn.addEventListener('click', handleCategoryDelete);
+            });
+
+            // Drag & Drop items
             if (editMode) {
                 document.querySelectorAll('.item').forEach(item => {
                     item.removeEventListener('dragstart', handleDragStart);
@@ -598,6 +815,20 @@
                     item.addEventListener('dragleave', handleDragLeave);
                     item.addEventListener('drop', handleDrop);
                 });
+
+                // Drag & Drop categorías
+                document.querySelectorAll('.categoria-wrapper').forEach(wrapper => {
+                    wrapper.removeEventListener('dragstart', handleCatDragStart);
+                    wrapper.removeEventListener('dragend', handleCatDragEnd);
+                    wrapper.removeEventListener('dragover', handleCatDragOver);
+                    wrapper.removeEventListener('dragleave', handleCatDragLeave);
+                    wrapper.removeEventListener('drop', handleCatDrop);
+                    wrapper.addEventListener('dragstart', handleCatDragStart);
+                    wrapper.addEventListener('dragend', handleCatDragEnd);
+                    wrapper.addEventListener('dragover', handleCatDragOver);
+                    wrapper.addEventListener('dragleave', handleCatDragLeave);
+                    wrapper.addEventListener('drop', handleCatDrop);
+                });
             }
 
             // Botón Reiniciar
@@ -607,10 +838,17 @@
             // Botón Editar
             document.getElementById('editBtn').removeEventListener('click', handleEditToggle);
             document.getElementById('editBtn').addEventListener('click', handleEditToggle);
+
+            // Botón Agregar Categoría
+            document.getElementById('addCategoriaBtn').removeEventListener('click', handleAddCategory);
+            document.getElementById('addCategoriaBtn').addEventListener('click', handleAddCategory);
+
+            document.getElementById('addCategoriaInput').removeEventListener('keydown', handleAddCategoryKeydown);
+            document.getElementById('addCategoriaInput').addEventListener('keydown', handleAddCategoryKeydown);
         }
 
         // ============================================================
-        // HANDLERS
+        // HANDLERS - ITEMS
         // ============================================================
         function handleCheckboxChange(e) {
             const cat = e.target.dataset.categoria;
@@ -677,7 +915,56 @@
         }
 
         // ============================================================
-        // DRAG & DROP
+        // HANDLERS - CATEGORÍAS
+        // ============================================================
+        function handleCategoryDelete(e) {
+            if (!editMode) return;
+            const catId = e.target.dataset.categoria;
+            if (categories.length <= 1) {
+                alert('Debe haber al menos una categoría');
+                return;
+            }
+            if (confirm(`¿Eliminar la categoría "${getCategoryName(catId)}" y todos sus items?`)) {
+                const index = categories.findIndex(c => c.id === catId);
+                if (index !== -1) {
+                    categories.splice(index, 1);
+                    delete data[catId];
+                    saveData();
+                    render();
+                }
+            }
+        }
+
+        function handleAddCategory() {
+            const input = document.getElementById('addCategoriaInput');
+            const select = document.getElementById('addCategoriaIcon');
+            const name = input.value.trim();
+            const emoji = select.value;
+            if (!name) {
+                alert('Ingresa un nombre para la categoría');
+                return;
+            }
+            const id = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+            if (categories.find(c => c.id === id)) {
+                alert('Ya existe una categoría con ese nombre');
+                return;
+            }
+            categories.push({ id, emoji, nombre: name, items: [] });
+            data[id] = [];
+            saveData();
+            render();
+            input.value = '';
+            input.focus();
+        }
+
+        function handleAddCategoryKeydown(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('addCategoriaBtn').click();
+            }
+        }
+
+        // ============================================================
+        // DRAG & DROP ITEMS
         // ============================================================
         function handleDragStart(e) {
             if (!editMode) return;
@@ -746,6 +1033,71 @@
         }
 
         // ============================================================
+        // DRAG & DROP CATEGORÍAS
+        // ============================================================
+        function handleCatDragStart(e) {
+            if (!editMode) return;
+            const wrapper = e.target.closest('.categoria-wrapper');
+            if (!wrapper) return;
+            const catId = wrapper.dataset.categoriaId;
+            catDragData = { catId };
+            wrapper.classList.add('dragging-cat');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', catId);
+            setTimeout(() => { wrapper.style.opacity = '0.4'; }, 0);
+        }
+
+        function handleCatDragEnd(e) {
+            const wrapper = e.target.closest('.categoria-wrapper');
+            if (wrapper) {
+                wrapper.classList.remove('dragging-cat');
+                wrapper.style.opacity = '1';
+            }
+            document.querySelectorAll('.categoria-wrapper.drag-over-cat').forEach(el => el.classList.remove('drag-over-cat'));
+            catDragData = null;
+            catDragOverData = null;
+        }
+
+        function handleCatDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            const targetWrapper = e.target.closest('.categoria-wrapper');
+            if (!targetWrapper || !catDragData) return;
+            const catId = targetWrapper.dataset.categoriaId;
+            if (catId !== catDragData.catId) {
+                document.querySelectorAll('.categoria-wrapper.drag-over-cat').forEach(el => el.classList.remove('drag-over-cat'));
+                targetWrapper.classList.add('drag-over-cat');
+                catDragOverData = { catId };
+            }
+        }
+
+        function handleCatDragLeave(e) {
+            const targetWrapper = e.target.closest('.categoria-wrapper');
+            if (targetWrapper) {
+                targetWrapper.classList.remove('drag-over-cat');
+            }
+        }
+
+        function handleCatDrop(e) {
+            e.preventDefault();
+            const targetWrapper = e.target.closest('.categoria-wrapper');
+            if (!targetWrapper || !catDragData || !catDragOverData) return;
+            if (catDragData.catId !== catDragOverData.catId) {
+                const fromIndex = categories.findIndex(c => c.id === catDragData.catId);
+                const toIndex = categories.findIndex(c => c.id === catDragOverData.catId);
+                if (fromIndex !== -1 && toIndex !== -1) {
+                    const [moved] = categories.splice(fromIndex, 1);
+                    categories.splice(toIndex, 0, moved);
+                    saveData();
+                    render();
+                }
+            }
+            targetWrapper.classList.remove('drag-over-cat');
+            catDragData = null;
+            catDragOverData = null;
+        }
+
+        // ============================================================
         // BOTONES PRINCIPALES
         // ============================================================
         function handleReset() {
@@ -761,16 +1113,4 @@
         function handleEditToggle() {
             editMode = !editMode;
             const btn = document.getElementById('editBtn');
-            btn.textContent = editMode ? '🔒 Salir' : '✏️ Editar';
-            btn.classList.toggle('active', editMode);
-            render();
-        }
-
-        // ============================================================
-        // INICIO
-        // ============================================================
-        loadData();
-        render();
-    </script>
-</body>
-</html>
+            btn.textContent = editMode ? '✅ Listo' : '✏️ Ed
