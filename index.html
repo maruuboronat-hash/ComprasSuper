@@ -63,7 +63,11 @@ h1 .ti{font-size:22px;color:var(--violet)}
 .cat-icon{width:34px;height:34px;border-radius:10px;background:var(--violet-light);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .cat-icon .ti{font-size:18px;color:var(--violet)}
 
-.categoria-titulo{font-size:16px;font-weight:600;color:#1a1730;display:flex;align-items:center;gap:8px;flex:1}
+.categoria-titulo{font-size:16px;font-weight:600;color:#1a1730;display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.categoria-titulo .cat-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.categoria-titulo-input{font-size:16px;font-weight:600;color:#1a1730;border:2px solid var(--violet);border-radius:8px;padding:2px 10px;background:rgba(255,255,255,0.9);outline:none;flex:1;min-width:60px;font-family:inherit}
+.categoria-titulo-input:focus{box-shadow:0 0 0 3px rgba(108,71,255,0.15)}
+
 .item-count-badge{background:var(--violet-light);color:var(--violet);font-size:11px;font-weight:600;padding:2px 8px;border-radius:50px;min-width:24px;text-align:center}
 .toggle-icon{font-size:14px;color:#c4b5fd;transition:transform 0.3s ease;margin-left:auto}
 .toggle-icon.collapsed{transform:rotate(-90deg)}
@@ -74,6 +78,8 @@ h1 .ti{font-size:22px;color:var(--violet)}
 .icon-btn:hover{background:rgba(108,71,255,0.1);border-color:rgba(108,71,255,0.3);transform:scale(1.05)}
 .icon-btn:active{transform:scale(0.93)}
 .icon-btn.show,.edit-mode .icon-btn{display:flex}
+.icon-btn-edit{color:#f39c12;border-color:rgba(243,156,18,0.2)}
+.icon-btn-edit:hover{background:rgba(243,156,18,0.1);border-color:rgba(243,156,18,0.3)}
 .icon-btn-danger{color:#c0392b;border-color:rgba(192,57,43,0.15)}
 .icon-btn-danger:hover{background:rgba(192,57,43,0.07);border-color:rgba(192,57,43,0.3)}
 
@@ -94,9 +100,12 @@ h1 .ti{font-size:22px;color:var(--violet)}
 .item-checkbox:checked::after{content:'';position:absolute;top:3px;left:6px;width:5px;height:9px;border:2px solid #fff;border-top:none;border-left:none;transform:rotate(45deg)}
 .item-checkbox:hover:not(:checked){border-color:var(--violet);background:var(--violet-light)}
 
-.item-text{flex:1;font-size:15px;color:#2d2250;transition:var(--transition);word-break:break-word;line-height:1.4}
+.item-text{flex:1;font-size:15px;color:#2d2250;transition:var(--transition);word-break:break-word;line-height:1.4;min-width:0}
 .item-text.checked{text-decoration:line-through;color:#b0a8c8}
+.item-text-input{font-size:15px;color:#2d2250;border:2px solid var(--violet);border-radius:8px;padding:2px 10px;background:rgba(255,255,255,0.9);outline:none;flex:1;min-width:50px;font-family:inherit}
+.item-text-input:focus{box-shadow:0 0 0 3px rgba(108,71,255,0.15)}
 
+.item-actions{display:flex;gap:4px;align-items:center;flex-shrink:0}
 .item-delete{color:#b0a8c8;font-size:0;cursor:pointer;display:none;padding:4px;border-radius:6px;transition:var(--transition);touch-action:manipulation;background:transparent;border:none}
 .item-delete .ti{font-size:15px}
 .item-delete:hover{color:#c0392b;background:rgba(192,57,43,0.07)}
@@ -120,6 +129,9 @@ h1 .ti{font-size:22px;color:var(--violet)}
   .item-text{font-size:14px}
   .add-categoria-top{flex-direction:column}
   .add-categoria-top input,.add-categoria-top select{width:100%;min-width:unset}
+  .categoria-titulo{font-size:14px}
+  .categoria-titulo-input{font-size:14px}
+  .item-text-input{font-size:14px}
 }
 </style>
 </head>
@@ -179,7 +191,7 @@ const categoriasData=[
   {id:'bebidas',icon:'ti-bottle',nombre:'Bebidas',items:['Agua','Gaseosas','Jugo','Cerveza','Vino']}
 ];
 
-let categories=[],data={},editMode=false,dragData=null,dragOverData=null,catDragData=null,catDragOverData=null,collapsedCategories={};
+let categories=[],data={},editMode=false,dragData=null,dragOverData=null,catDragData=null,catDragOverData=null,collapsedCategories={},editingItem=null,editingCat=null;
 
 function loadData(){
   const saved=localStorage.getItem('listaComprasV2');
@@ -221,6 +233,30 @@ function toggleCategory(catId){
   saveData();render();
 }
 
+function startEditItem(catId,index){
+  editingItem={catId,index};
+  render();
+  setTimeout(()=>{
+    const input=document.querySelector(`.item-text-input[data-categoria="${catId}"][data-index="${index}"]`);
+    if(input){input.focus();input.select();}
+  },50);
+}
+
+function startEditCat(catId){
+  editingCat=catId;
+  render();
+  setTimeout(()=>{
+    const input=document.querySelector(`.categoria-titulo-input[data-categoria-id="${catId}"]`);
+    if(input){input.focus();input.select();}
+  },50);
+}
+
+function cancelEdit(){
+  editingItem=null;
+  editingCat=null;
+  render();
+}
+
 function render(){
   const container=document.getElementById('listaContainer');
   container.innerHTML='';
@@ -228,6 +264,7 @@ function render(){
     const items=data[cat.id]||[];
     const isCollapsed=collapsedCategories[cat.id]||false;
     const iconClass=cat.icon||'ti-shopping-cart';
+    const isEditingCat=editingCat===cat.id;
     const wrapper=document.createElement('div');
     wrapper.className='categoria-wrapper';
     wrapper.dataset.categoriaId=cat.id;
@@ -239,12 +276,13 @@ function render(){
   <div class="categoria-header-left">
     <span class="cat-drag-handle ${editMode?'show':''}" aria-hidden="true"><i class="ti ti-grip-vertical"></i></span>
     <div class="cat-icon" aria-hidden="true"><i class="ti ${iconClass}"></i></div>
-    <span class="categoria-titulo">
-      ${cat.nombre}
-      <span class="item-count-badge">${items.length}</span>
-    </span>
+    ${isEditingCat && editMode ? 
+      `<input type="text" class="categoria-titulo-input" data-categoria-id="${cat.id}" value="${cat.nombre}" placeholder="Nombre...">` :
+      `<span class="categoria-titulo"><span class="cat-name">${cat.nombre}</span><span class="item-count-badge">${items.length}</span></span>`
+    }
   </div>
   <div class="categoria-actions">
+    ${editMode ? `<button class="icon-btn icon-btn-edit show" data-action="cat-edit" data-categoria="${cat.id}" title="Editar nombre" aria-label="Editar nombre"><i class="ti ti-pencil"></i></button>` : ''}
     <button class="icon-btn ${editMode?'show':''}" data-categoria="${cat.id}" title="Agregar item" aria-label="Agregar item"><i class="ti ti-plus"></i></button>
     <button class="icon-btn icon-btn-danger ${editMode?'show':''}" data-action="cat-delete" data-categoria="${cat.id}" title="Eliminar categoría" aria-label="Eliminar categoría"><i class="ti ti-trash"></i></button>
     <i class="ti ti-chevron-down toggle-icon ${isCollapsed?'collapsed':''}" aria-hidden="true"></i>
@@ -252,13 +290,21 @@ function render(){
 </div>
 <div class="items-container ${isCollapsed?'collapsed':''}" data-categoria-id="${cat.id}">
   ${items.length===0?'<div class="empty-message">Sin productos aún</div>':''}
-  ${items.map((item,index)=>`
+  ${items.map((item,index)=>{
+    const isEditing=editingItem && editingItem.catId===cat.id && editingItem.index===index;
+    return `
     <div class="item" data-categoria="${cat.id}" data-index="${index}" draggable="${editMode}">
       <span class="drag-handle ${editMode?'show':''}" aria-hidden="true"><i class="ti ti-grip-vertical"></i></span>
       <input type="checkbox" class="item-checkbox" ${item.checked?'checked':''} data-categoria="${cat.id}" data-index="${index}" aria-label="${item.text}">
-      <span class="item-text ${item.checked?'checked':''}">${item.text}</span>
-      <button class="item-delete ${editMode?'show':''}" data-categoria="${cat.id}" data-index="${index}" aria-label="Eliminar ${item.text}"><i class="ti ti-x"></i></button>
-    </div>`).join('')}
+      ${isEditing && editMode ? 
+        `<input type="text" class="item-text-input" data-categoria="${cat.id}" data-index="${index}" value="${item.text}" placeholder="Nombre...">` :
+        `<span class="item-text ${item.checked?'checked':''}">${item.text}</span>`
+      }
+      <div class="item-actions">
+        ${editMode ? `<button class="icon-btn icon-btn-edit show" data-action="item-edit" data-categoria="${cat.id}" data-index="${index}" title="Editar" aria-label="Editar"><i class="ti ti-pencil"></i></button>` : ''}
+        <button class="item-delete ${editMode?'show':''}" data-categoria="${cat.id}" data-index="${index}" aria-label="Eliminar ${item.text}"><i class="ti ti-x"></i></button>
+      </div>
+    </div>`}).join('')}
 </div>
 <div class="add-item-input-container ${editMode?'show':''}" data-categoria="${cat.id}">
   <input type="text" class="add-item-input" placeholder="Agregar producto...">
@@ -268,12 +314,13 @@ function render(){
     container.appendChild(wrapper);
   });
   document.getElementById('btnNuevaCategoria').classList.toggle('show',editMode);
-  if(!editMode)document.getElementById('addCategoriaTop').classList.remove('show');
+  if(!editMode){document.getElementById('addCategoriaTop').classList.remove('show');editingItem=null;editingCat=null;}
   attachEvents();
   updateCount();
 }
 
 function attachEvents(){
+  // Click en header para colapsar
   document.querySelectorAll('.categoria-header').forEach(h=>{
     h.onclick=e=>{
       if(editMode)return;
@@ -281,6 +328,8 @@ function attachEvents(){
       toggleCategory(h.dataset.categoriaId);
     };
   });
+
+  // Checkboxes
   document.querySelectorAll('.item-checkbox').forEach(cb=>{
     cb.onchange=e=>{
       const cat=e.target.dataset.categoria,index=parseInt(e.target.dataset.index);
@@ -293,6 +342,8 @@ function attachEvents(){
       }
     };
   });
+
+  // Eliminar items
   document.querySelectorAll('.item-delete').forEach(btn=>{
     btn.onclick=e=>{
       if(!editMode)return;
@@ -301,6 +352,68 @@ function attachEvents(){
       if(data[cat]){data[cat].splice(index,1);saveData();render();}
     };
   });
+
+  // Editar item - click en lapiz
+  document.querySelectorAll('[data-action="item-edit"]').forEach(btn=>{
+    btn.onclick=e=>{
+      e.stopPropagation();
+      const cat=btn.dataset.categoria,index=parseInt(btn.dataset.index);
+      startEditItem(cat,index);
+    };
+  });
+
+  // Editar categoría - click en lapiz
+  document.querySelectorAll('[data-action="cat-edit"]').forEach(btn=>{
+    btn.onclick=e=>{
+      e.stopPropagation();
+      startEditCat(btn.dataset.categoria);
+    };
+  });
+
+  // Input de edición de categoría - Enter o blur
+  document.querySelectorAll('.categoria-titulo-input').forEach(inp=>{
+    inp.onkeydown=e=>{
+      if(e.key==='Enter'){
+        const val=inp.value.trim();
+        if(val){
+          const cat=categories.find(c=>c.id===inp.dataset.categoriaId);
+          if(cat){cat.nombre=val;saveData();editingCat=null;render();}
+        } else {editingCat=null;render();}
+      }
+      if(e.key==='Escape'){editingCat=null;render();}
+    };
+    inp.onblur=()=>{
+      const val=inp.value.trim();
+      if(val){
+        const cat=categories.find(c=>c.id===inp.dataset.categoriaId);
+        if(cat){cat.nombre=val;saveData();}
+      }
+      editingCat=null;
+      render();
+    };
+  });
+
+  // Input de edición de item - Enter o blur
+  document.querySelectorAll('.item-text-input').forEach(inp=>{
+    inp.onkeydown=e=>{
+      if(e.key==='Enter'){
+        const val=inp.value.trim();
+        const cat=inp.dataset.categoria,index=parseInt(inp.dataset.index);
+        if(val&&data[cat]&&data[cat][index]){data[cat][index].text=val;saveData();editingItem=null;render();}
+        else {editingItem=null;render();}
+      }
+      if(e.key==='Escape'){editingItem=null;render();}
+    };
+    inp.onblur=()=>{
+      const val=inp.value.trim();
+      const cat=inp.dataset.categoria,index=parseInt(inp.dataset.index);
+      if(val&&data[cat]&&data[cat][index]){data[cat][index].text=val;saveData();}
+      editingItem=null;
+      render();
+    };
+  });
+
+  // Botones de acciones de categoría
   document.querySelectorAll('.icon-btn[data-categoria]').forEach(btn=>{
     if(btn.dataset.action==='cat-delete'){
       btn.onclick=e=>{
@@ -313,7 +426,7 @@ function attachEvents(){
           if(idx!==-1){categories.splice(idx,1);delete data[catId];delete collapsedCategories[catId];saveData();render();}
         }
       };
-    } else {
+    } else if(btn.dataset.action!=='cat-edit' && btn.dataset.action!=='item-edit') {
       btn.onclick=e=>{
         e.stopPropagation();
         const cat=btn.dataset.categoria;
@@ -325,6 +438,8 @@ function attachEvents(){
       };
     }
   });
+
+  // Agregar items
   document.querySelectorAll('.add-item-confirm').forEach(btn=>{
     btn.onclick=e=>{
       e.stopPropagation();
@@ -342,9 +457,12 @@ function attachEvents(){
       }
     };
   });
+
   document.querySelectorAll('.add-item-input').forEach(inp=>{
     inp.onkeydown=e=>{if(e.key==='Enter')inp.closest('.categoria').querySelector('.add-item-confirm').click();};
   });
+
+  // Drag & Drop Items
   if(editMode){
     document.querySelectorAll('.item').forEach(item=>{
       item.ondragstart=e=>{
@@ -375,6 +493,8 @@ function attachEvents(){
         saveData();render();dragData=null;dragOverData=null;
       };
     });
+
+    // Drag & Drop Categorías
     document.querySelectorAll('.categoria-wrapper').forEach(w=>{
       w.ondragstart=e=>{
         if(!editMode)return;
@@ -407,29 +527,35 @@ function attachEvents(){
       };
     });
   }
+
+  // Botones principales
   document.getElementById('resetBtn').onclick=()=>{
     if(confirm('¿Desmarcar todos los productos?')){
       Object.keys(data).forEach(cat=>data[cat].forEach(i=>{i.checked=false;}));
       saveData();render();
     }
   };
+
   document.getElementById('editBtn').onclick=()=>{
     editMode=!editMode;
     const btn=document.getElementById('editBtn');
     btn.innerHTML=editMode?'<i class="ti ti-check"></i> Listo':'<i class="ti ti-pencil"></i> Editar';
     btn.classList.toggle('active',editMode);
-    if(!editMode)document.getElementById('addCategoriaTop').classList.remove('show');
+    if(!editMode){document.getElementById('addCategoriaTop').classList.remove('show');editingItem=null;editingCat=null;}
     render();
   };
+
   document.getElementById('btnNuevaCategoria').onclick=()=>{
     const c=document.getElementById('addCategoriaTop');
     c.classList.toggle('show');
     if(c.classList.contains('show'))setTimeout(()=>document.getElementById('addCategoriaInput').focus(),50);
   };
+
   document.getElementById('cancelCategoriaBtn').onclick=()=>{
     document.getElementById('addCategoriaTop').classList.remove('show');
     document.getElementById('addCategoriaInput').value='';
   };
+
   document.getElementById('addCategoriaBtn').onclick=()=>{
     const inp=document.getElementById('addCategoriaInput');
     const sel=document.getElementById('addCategoriaIcon');
@@ -441,6 +567,7 @@ function attachEvents(){
     saveData();render();inp.value='';
     document.getElementById('addCategoriaTop').classList.remove('show');
   };
+
   document.getElementById('addCategoriaInput').onkeydown=e=>{
     if(e.key==='Enter')document.getElementById('addCategoriaBtn').click();
     if(e.key==='Escape')document.getElementById('cancelCategoriaBtn').click();
