@@ -185,6 +185,8 @@
             padding: 15px;
             margin-bottom: 20px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            overflow: hidden;
+            transition: all 0.3s ease;
         }
 
         .categoria-header {
@@ -194,6 +196,12 @@
             margin-bottom: 12px;
             padding-bottom: 8px;
             border-bottom: 2px solid #ecf0f1;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .categoria-header:hover .categoria-titulo {
+            color: #3498db;
         }
 
         .categoria-header-left {
@@ -201,6 +209,7 @@
             align-items: center;
             gap: 10px;
             flex: 1;
+            min-width: 0;
         }
 
         .cat-drag-handle {
@@ -228,16 +237,30 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            transition: color 0.2s;
+            flex: 1;
         }
 
         .categoria-titulo .emoji {
             font-size: 24px;
         }
 
+        .categoria-titulo .toggle-icon {
+            font-size: 14px;
+            color: #bdc3c7;
+            transition: transform 0.3s ease;
+            margin-left: 5px;
+        }
+
+        .categoria-titulo .toggle-icon.collapsed {
+            transform: rotate(-90deg);
+        }
+
         .categoria-actions {
             display: flex;
             gap: 8px;
             align-items: center;
+            flex-shrink: 0;
         }
 
         .add-item-btn {
@@ -286,6 +309,24 @@
 
         .cat-delete-btn:active {
             transform: scale(0.9);
+        }
+
+        .items-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            max-height: 2000px;
+            opacity: 1;
+        }
+
+        .items-container.collapsed {
+            max-height: 0;
+            opacity: 0;
+            padding: 0;
+            margin: 0;
+            pointer-events: none;
         }
 
         .item {
@@ -398,6 +439,8 @@
             margin-top: 12px;
             gap: 10px;
             align-items: center;
+            overflow: hidden;
+            transition: all 0.3s ease;
         }
 
         .add-item-input-container.show {
@@ -465,6 +508,19 @@
 
         .edit-mode .btn-nueva-categoria {
             display: inline-block !important;
+        }
+
+        /* En modo edición, el header no colapsa */
+        .edit-mode .categoria-header {
+            cursor: default;
+        }
+
+        .edit-mode .categoria-header:hover .categoria-titulo {
+            color: #2c3e50;
+        }
+
+        .edit-mode .categoria-titulo .toggle-icon {
+            display: none;
         }
 
         .empty-message {
@@ -589,6 +645,7 @@
         let dragOverData = null;
         let catDragData = null;
         let catDragOverData = null;
+        let collapsedCategories = {};
 
         function loadData() {
             const saved = localStorage.getItem('listaComprasPro');
@@ -598,6 +655,7 @@
                     if (parsed.categories && parsed.data) {
                         categories = parsed.categories;
                         data = parsed.data;
+                        collapsedCategories = parsed.collapsedCategories || {};
                         categories.forEach(cat => {
                             if (!data[cat.id]) {
                                 data[cat.id] = cat.items.map(item => ({ text: item, checked: false }));
@@ -617,6 +675,7 @@
             }
             categories = JSON.parse(JSON.stringify(categoriasData));
             data = {};
+            collapsedCategories = {};
             categories.forEach(cat => {
                 data[cat.id] = cat.items.map(item => ({ text: item, checked: false }));
             });
@@ -624,7 +683,7 @@
         }
 
         function saveData() {
-            localStorage.setItem('listaComprasPro', JSON.stringify({ categories, data }));
+            localStorage.setItem('listaComprasPro', JSON.stringify({ categories, data, collapsedCategories }));
             updateTotalCount();
         }
 
@@ -639,12 +698,20 @@
             return cat ? cat.nombre : catId;
         }
 
+        function toggleCategory(catId) {
+            if (editMode) return;
+            collapsedCategories[catId] = !collapsedCategories[catId];
+            saveData();
+            render();
+        }
+
         function render() {
             const container = document.getElementById('listaContainer');
             container.innerHTML = '';
 
             categories.forEach((cat) => {
                 const items = data[cat.id] || [];
+                const isCollapsed = collapsedCategories[cat.id] || false;
 
                 const wrapper = document.createElement('div');
                 wrapper.className = 'categoria-wrapper';
@@ -656,13 +723,14 @@
                 if (editMode) div.classList.add('edit-mode');
 
                 div.innerHTML = `
-                    <div class="categoria-header">
+                    <div class="categoria-header" data-categoria-id="${cat.id}">
                         <div class="categoria-header-left">
                             <span class="cat-drag-handle ${editMode ? 'show' : ''}">⠿</span>
                             <span class="categoria-titulo">
                                 <span class="emoji">${cat.emoji}</span>
                                 ${cat.nombre}
                                 <span class="item-count">(${items.length})</span>
+                                <span class="toggle-icon ${isCollapsed ? 'collapsed' : ''}">▼</span>
                             </span>
                         </div>
                         <div class="categoria-actions">
@@ -670,7 +738,7 @@
                             <button class="cat-delete-btn ${editMode ? 'show' : ''}" data-categoria="${cat.id}">✕</button>
                         </div>
                     </div>
-                    <div class="items-container" data-categoria="${cat.id}">
+                    <div class="items-container ${isCollapsed ? 'collapsed' : ''}" data-categoria-id="${cat.id}">
                         ${items.length === 0 ? '<div class="empty-message">Sin items</div>' : ''}
                         ${items.map((item, index) => `
                             <div class="item" data-categoria="${cat.id}" data-index="${index}" draggable="${editMode}">
@@ -704,6 +772,12 @@
         }
 
         function attachEvents() {
+            // Click en header para colapsar (solo si no está en modo edición)
+            document.querySelectorAll('.categoria-header').forEach(header => {
+                header.removeEventListener('click', handleHeaderClick);
+                header.addEventListener('click', handleHeaderClick);
+            });
+
             document.querySelectorAll('.item-checkbox').forEach(cb => {
                 cb.removeEventListener('change', handleCheckboxChange);
                 cb.addEventListener('change', handleCheckboxChange);
@@ -781,6 +855,16 @@
             document.getElementById('addCategoriaInput').addEventListener('keydown', handleAddCategoryKeydown);
         }
 
+        function handleHeaderClick(e) {
+            if (editMode) return;
+            const header = e.target.closest('.categoria-header');
+            if (!header) return;
+            // Si el click fue en un botón dentro del header, no colapsar
+            if (e.target.closest('.categoria-actions')) return;
+            const catId = header.dataset.categoriaId;
+            toggleCategory(catId);
+        }
+
         function handleCheckboxChange(e) {
             const cat = e.target.dataset.categoria;
             const index = parseInt(e.target.dataset.index);
@@ -797,6 +881,7 @@
 
         function handleDelete(e) {
             if (!editMode) return;
+            e.stopPropagation();
             const cat = e.target.dataset.categoria;
             const index = parseInt(e.target.dataset.index);
             if (data[cat]) {
@@ -807,6 +892,7 @@
         }
 
         function handleAddBtnClick(e) {
+            e.stopPropagation();
             const cat = e.target.dataset.categoria;
             const container = e.target.closest('.categoria');
             const inputContainer = container.querySelector('.add-item-input-container');
@@ -818,6 +904,7 @@
         }
 
         function handleAddConfirm(e) {
+            e.stopPropagation();
             const cat = e.target.dataset.categoria;
             const container = e.target.closest('.categoria');
             const input = container.querySelector('.add-item-input');
@@ -845,6 +932,7 @@
 
         function handleCategoryDelete(e) {
             if (!editMode) return;
+            e.stopPropagation();
             const catId = e.target.dataset.categoria;
             if (categories.length <= 1) {
                 alert('Debe haber al menos una categoría');
@@ -855,6 +943,7 @@
                 if (index !== -1) {
                     categories.splice(index, 1);
                     delete data[catId];
+                    delete collapsedCategories[catId];
                     saveData();
                     render();
                 }
@@ -890,6 +979,7 @@
             }
             categories.push({ id, emoji, nombre: name, items: [] });
             data[id] = [];
+            collapsedCategories[id] = false;
             saveData();
             render();
             input.value = '';
@@ -905,6 +995,9 @@
             }
         }
 
+        // ============================================================
+        // DRAG & DROP
+        // ============================================================
         function handleDragStart(e) {
             if (!editMode) return;
             const item = e.target.closest('.item');
