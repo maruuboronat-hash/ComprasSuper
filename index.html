@@ -45,16 +45,16 @@ h1 .ti{font-size:22px;color:var(--violet)}
 .btn-add-ok:hover{background:var(--violet-dark);transform:translateY(-1px)}
 .btn-add-ok:active{transform:scale(0.97)}
 
-.categoria-wrapper{transition:var(--transition);touch-action:pan-y}
-.categoria-wrapper.dragging-cat{opacity:0.3;transform:scale(0.97)}
-.categoria-wrapper.drag-over-cat{padding-top:16px;border-top:2px solid var(--violet)}
+.categoria-wrapper{transition:var(--transition);touch-action:pan-y;position:relative}
+.categoria-wrapper.dragging-cat{opacity:0.4;transform:scale(0.97);z-index:1000}
+.categoria-wrapper.drag-over-cat{padding-top:16px;border-top:3px solid var(--violet);margin-top:0}
 
 .categoria{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:16px;margin-bottom:14px;backdrop-filter:blur(12px);box-shadow:var(--shadow);transition:var(--transition);touch-action:pan-y}
 .categoria:hover{box-shadow:0 4px 24px rgba(108,71,255,0.1)}
 
 .categoria-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid rgba(108,71,255,0.08);cursor:pointer;user-select:none;touch-action:manipulation}
 .categoria-header-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
-.cat-drag-handle{color:#c4b5fd;font-size:18px;cursor:grab;display:none;user-select:none;touch-action:none}
+.cat-drag-handle{color:#c4b5fd;font-size:18px;cursor:grab;display:none;user-select:none;touch-action:none;padding:8px 4px}
 .cat-drag-handle.show,.edit-mode .cat-drag-handle{display:block}
 .cat-drag-handle:active{cursor:grabbing}
 
@@ -86,12 +86,12 @@ h1 .ti{font-size:22px;color:var(--violet)}
 .items-container{display:flex;flex-direction:column;gap:2px;overflow:hidden;transition:max-height 0.35s cubic-bezier(.4,0,.2,1),opacity 0.25s ease;max-height:3000px;opacity:1;touch-action:pan-y}
 .items-container.collapsed{max-height:0;opacity:0;pointer-events:none}
 
-.item{display:flex;align-items:center;padding:9px 8px;border-radius:10px;margin-bottom:2px;transition:var(--transition);gap:10px;touch-action:pan-y}
+.item{display:flex;align-items:center;padding:9px 8px;border-radius:10px;margin-bottom:2px;transition:var(--transition);gap:10px;touch-action:pan-y;position:relative}
 .item:hover{background:rgba(108,71,255,0.04)}
-.item.dragging{opacity:0.4;background:var(--violet-light)}
+.item.dragging{opacity:0.4;background:var(--violet-light);z-index:1000;transform:scale(0.97)}
 .item.drag-over{border-top:2px solid var(--violet);background:rgba(108,71,255,0.05)}
 
-.drag-handle{color:#c4b5fd;font-size:16px;cursor:grab;display:none;user-select:none;touch-action:none}
+.drag-handle{color:#c4b5fd;font-size:16px;cursor:grab;display:none;user-select:none;touch-action:none;padding:8px 4px}
 .drag-handle.show,.edit-mode .drag-handle{display:block}
 .drag-handle:active{cursor:grabbing}
 
@@ -123,6 +123,8 @@ h1 .ti{font-size:22px;color:var(--violet)}
 .add-item-confirm:active{transform:scale(0.97)}
 .empty-message{text-align:center;color:#c4b5fd;padding:16px;font-size:14px}
 
+.drag-ghost{position:fixed;pointer-events:none;z-index:9999;opacity:0.8;background:var(--glass);border:2px solid var(--violet);border-radius:var(--radius);padding:12px 20px;box-shadow:0 8px 32px rgba(108,71,255,0.25);font-size:14px;font-weight:500;color:#1a1730;backdrop-filter:blur(12px);transform:translate(-50%,-50%);display:none}
+
 @media(max-width:600px){
   body{padding:12px;padding-bottom:80px}
   h1{font-size:20px}
@@ -134,7 +136,7 @@ h1 .ti{font-size:22px;color:var(--violet)}
   .categoria-titulo{font-size:14px}
   .categoria-titulo-input{font-size:14px}
   .item-text-input{font-size:14px}
-  .cat-drag-handle,.drag-handle{display:none !important}
+  .cat-drag-handle,.drag-handle{padding:10px 6px}
 }
 </style>
 </head>
@@ -173,10 +175,10 @@ h1 .ti{font-size:22px;color:var(--violet)}
 
 <div id="listaContainer"></div>
 
-<script>
-// Detectar si es dispositivo táctil
-const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+<!-- Ghost element para arrastre -->
+<div class="drag-ghost" id="dragGhost"></div>
 
+<script>
 const CAT_ICONS={
   verduleria:'ti-leaf',lacteos:'ti-cheese',almacen:'ti-building-store',
   panaderia:'ti-bread',carnes:'ti-meat',congelados:'ti-snowflake',
@@ -197,9 +199,167 @@ const categoriasData=[
   {id:'bebidas',icon:'ti-bottle',nombre:'Bebidas',items:['Agua','Gaseosas','Jugo','Cerveza','Vino']}
 ];
 
-let categories=[],data={},editMode=false,dragData=null,dragOverData=null,catDragData=null,catDragOverData=null,collapsedCategories={},editingItem=null,editingCat=null;
-let dragEnabled = !isTouchDevice;
+let categories=[],data={},editMode=false,collapsedCategories={},editingItem=null,editingCat=null;
 
+// ============================================
+// DRAG & DROP TÁCTIL MEJORADO
+// ============================================
+let touchDrag = {
+  active: false,
+  type: null, // 'item' o 'category'
+  element: null,
+  data: null,
+  ghost: null,
+  startX: 0,
+  startY: 0,
+  offsetX: 0,
+  offsetY: 0,
+  currentTarget: null,
+  ghostElement: null
+};
+
+function initTouchDrag() {
+  const ghost = document.getElementById('dragGhost');
+  
+  // Eventos globales para touch drag
+  document.addEventListener('touchmove', function(e) {
+    if (!touchDrag.active) return;
+    e.preventDefault();
+    
+    const touch = e.touches[0];
+    const x = touch.clientX;
+    const y = touch.clientY;
+    
+    // Mover ghost
+    if (touchDrag.ghostElement) {
+      touchDrag.ghostElement.style.left = x + 'px';
+      touchDrag.ghostElement.style.top = y + 'px';
+      touchDrag.ghostElement.style.display = 'block';
+    }
+    
+    // Encontrar elemento debajo del dedo
+    const elementAtPoint = document.elementFromPoint(x, y);
+    if (!elementAtPoint) return;
+    
+    // Buscar target según tipo
+    let target = null;
+    if (touchDrag.type === 'item') {
+      target = elementAtPoint.closest('.item');
+      if (target && target.dataset.categoria === touchDrag.data.catId) {
+        // Remover drag-over de todos
+        document.querySelectorAll('.item.drag-over').forEach(el => el.classList.remove('drag-over'));
+        target.classList.add('drag-over');
+        touchDrag.currentTarget = target;
+      } else {
+        if (touchDrag.currentTarget) {
+          touchDrag.currentTarget.classList.remove('drag-over');
+          touchDrag.currentTarget = null;
+        }
+      }
+    } else if (touchDrag.type === 'category') {
+      target = elementAtPoint.closest('.categoria-wrapper');
+      if (target && target.dataset.categoriaId !== touchDrag.data.catId) {
+        document.querySelectorAll('.categoria-wrapper.drag-over-cat').forEach(el => el.classList.remove('drag-over-cat'));
+        target.classList.add('drag-over-cat');
+        touchDrag.currentTarget = target;
+      } else {
+        if (touchDrag.currentTarget) {
+          touchDrag.currentTarget.classList.remove('drag-over-cat');
+          touchDrag.currentTarget = null;
+        }
+      }
+    }
+  }, { passive: false });
+  
+  document.addEventListener('touchend', function(e) {
+    if (!touchDrag.active) return;
+    
+    // Ocultar ghost
+    if (touchDrag.ghostElement) {
+      touchDrag.ghostElement.style.display = 'none';
+    }
+    
+    // Realizar el drop
+    if (touchDrag.currentTarget) {
+      if (touchDrag.type === 'item') {
+        const targetItem = touchDrag.currentTarget;
+        const fromCat = touchDrag.data.catId;
+        const fromIndex = touchDrag.data.index;
+        const toCat = targetItem.dataset.categoria;
+        const toIndex = parseInt(targetItem.dataset.index);
+        
+        if (fromCat === toCat && fromIndex !== toIndex) {
+          const items = data[fromCat];
+          if (items) {
+            const [moved] = items.splice(fromIndex, 1);
+            items.splice(toIndex, 0, moved);
+            saveData();
+            render();
+          }
+        }
+        document.querySelectorAll('.item.drag-over').forEach(el => el.classList.remove('drag-over'));
+      } else if (touchDrag.type === 'category') {
+        const targetWrapper = touchDrag.currentTarget;
+        const fromId = touchDrag.data.catId;
+        const toId = targetWrapper.dataset.categoriaId;
+        
+        if (fromId !== toId) {
+          const fromIndex = categories.findIndex(c => c.id === fromId);
+          const toIndex = categories.findIndex(c => c.id === toId);
+          if (fromIndex !== -1 && toIndex !== -1) {
+            const [moved] = categories.splice(fromIndex, 1);
+            categories.splice(toIndex, 0, moved);
+            saveData();
+            render();
+          }
+        }
+        document.querySelectorAll('.categoria-wrapper.drag-over-cat').forEach(el => el.classList.remove('drag-over-cat'));
+      }
+    }
+    
+    // Limpiar
+    if (touchDrag.element) {
+      touchDrag.element.classList.remove('dragging');
+      touchDrag.element.style.opacity = '1';
+    }
+    touchDrag.active = false;
+    touchDrag.type = null;
+    touchDrag.element = null;
+    touchDrag.data = null;
+    touchDrag.currentTarget = null;
+  });
+}
+
+function startTouchDrag(e, type, element, data) {
+  if (!editMode) return;
+  if (e.target.closest('.icon-btn')) return;
+  if (e.target.closest('.item-checkbox')) return;
+  if (e.target.closest('.item-delete')) return;
+  
+  const touch = e.touches[0];
+  
+  touchDrag.active = true;
+  touchDrag.type = type;
+  touchDrag.element = element;
+  touchDrag.data = data;
+  touchDrag.startX = touch.clientX;
+  touchDrag.startY = touch.clientY;
+  
+  // Crear ghost
+  const ghost = document.getElementById('dragGhost');
+  ghost.textContent = type === 'item' ? 
+    data.text || 'Item' : 
+    categories.find(c => c.id === data.catId)?.nombre || 'Categoría';
+  ghost.style.display = 'none';
+  touchDrag.ghostElement = ghost;
+  
+  element.classList.add('dragging');
+  element.style.opacity = '0.4';
+}
+
+// ============================================
+// FUNCIONES PRINCIPALES
+// ============================================
 function loadData(){
   const saved=localStorage.getItem('listaComprasV2');
   if(saved){
@@ -235,7 +395,6 @@ function updateCount(){
 }
 
 function toggleCategory(catId){
-  // Ahora se puede colapsar/expandir siempre (incluso en modo edición)
   collapsedCategories[catId]=!collapsedCategories[catId];
   saveData();render();
 }
@@ -258,12 +417,6 @@ function startEditCat(catId){
   },50);
 }
 
-function cancelEdit(){
-  editingItem=null;
-  editingCat=null;
-  render();
-}
-
 function render(){
   const container=document.getElementById('listaContainer');
   container.innerHTML='';
@@ -275,13 +428,12 @@ function render(){
     const wrapper=document.createElement('div');
     wrapper.className='categoria-wrapper';
     wrapper.dataset.categoriaId=cat.id;
-    wrapper.draggable=editMode && dragEnabled;
     const div=document.createElement('div');
     div.className='categoria'+(editMode?' edit-mode':'');
     div.innerHTML=`
 <div class="categoria-header" data-categoria-id="${cat.id}">
   <div class="categoria-header-left">
-    <span class="cat-drag-handle ${editMode && dragEnabled ? 'show' : ''}" aria-hidden="true"><i class="ti ti-grip-vertical"></i></span>
+    <span class="cat-drag-handle ${editMode ? 'show' : ''}" aria-hidden="true" data-action="cat-drag" data-categoria="${cat.id}"><i class="ti ti-grip-vertical"></i></span>
     <div class="cat-icon" aria-hidden="true"><i class="ti ${iconClass}"></i></div>
     ${isEditingCat && editMode ? 
       `<input type="text" class="categoria-titulo-input" data-categoria-id="${cat.id}" value="${cat.nombre}" placeholder="Nombre...">` :
@@ -289,9 +441,9 @@ function render(){
     }
   </div>
   <div class="categoria-actions">
-    ${editMode ? `<button class="icon-btn icon-btn-edit show" data-action="cat-edit" data-categoria="${cat.id}" title="Editar nombre" aria-label="Editar nombre"><i class="ti ti-pencil"></i></button>` : ''}
-    <button class="icon-btn ${editMode?'show':''}" data-categoria="${cat.id}" title="Agregar item" aria-label="Agregar item"><i class="ti ti-plus"></i></button>
-    <button class="icon-btn icon-btn-danger ${editMode?'show':''}" data-action="cat-delete" data-categoria="${cat.id}" title="Eliminar categoría" aria-label="Eliminar categoría"><i class="ti ti-trash"></i></button>
+    ${editMode ? `<button class="icon-btn icon-btn-edit show" data-action="cat-edit" data-categoria="${cat.id}" title="Editar nombre"><i class="ti ti-pencil"></i></button>` : ''}
+    <button class="icon-btn ${editMode?'show':''}" data-categoria="${cat.id}" title="Agregar item"><i class="ti ti-plus"></i></button>
+    <button class="icon-btn icon-btn-danger ${editMode?'show':''}" data-action="cat-delete" data-categoria="${cat.id}" title="Eliminar categoría"><i class="ti ti-trash"></i></button>
     <i class="ti ti-chevron-down toggle-icon ${isCollapsed?'collapsed':''}" aria-hidden="true"></i>
   </div>
 </div>
@@ -300,15 +452,15 @@ function render(){
   ${items.map((item,index)=>{
     const isEditing=editingItem && editingItem.catId===cat.id && editingItem.index===index;
     return `
-    <div class="item" data-categoria="${cat.id}" data-index="${index}" draggable="${editMode && dragEnabled}">
-      <span class="drag-handle ${editMode && dragEnabled ? 'show' : ''}" aria-hidden="true"><i class="ti ti-grip-vertical"></i></span>
+    <div class="item" data-categoria="${cat.id}" data-index="${index}">
+      <span class="drag-handle ${editMode ? 'show' : ''}" aria-hidden="true" data-action="item-drag" data-categoria="${cat.id}" data-index="${index}" data-text="${item.text}"><i class="ti ti-grip-vertical"></i></span>
       <input type="checkbox" class="item-checkbox" ${item.checked?'checked':''} data-categoria="${cat.id}" data-index="${index}" aria-label="${item.text}">
       ${isEditing && editMode ? 
         `<input type="text" class="item-text-input" data-categoria="${cat.id}" data-index="${index}" value="${item.text}" placeholder="Nombre...">` :
         `<span class="item-text ${item.checked?'checked':''}" data-action="item-text-click" data-categoria="${cat.id}" data-index="${index}">${item.text}</span>`
       }
       <div class="item-actions">
-        ${editMode ? `<button class="icon-btn icon-btn-edit show" data-action="item-edit" data-categoria="${cat.id}" data-index="${index}" title="Editar" aria-label="Editar"><i class="ti ti-pencil"></i></button>` : ''}
+        ${editMode ? `<button class="icon-btn icon-btn-edit show" data-action="item-edit" data-categoria="${cat.id}" data-index="${index}" title="Editar"><i class="ti ti-pencil"></i></button>` : ''}
         <button class="item-delete ${editMode?'show':''}" data-categoria="${cat.id}" data-index="${index}" aria-label="Eliminar ${item.text}"><i class="ti ti-x"></i></button>
       </div>
     </div>`}).join('')}
@@ -327,45 +479,182 @@ function render(){
 }
 
 function attachEvents(){
-  // Click en header para colapsar (SIEMPRE, incluso en modo edición)
-  document.querySelectorAll('.categoria-header').forEach(h=>{
-    h.ontouchend = function(e) {
-      if(e.target.closest('.categoria-actions'))return;
-      // Si se hizo clic en un botón de edición, no colapsar
-      if(e.target.closest('.icon-btn'))return;
-      if(e.target.closest('.cat-name') && editMode)return;
-      if(e.target.closest('.item-text') && editMode)return;
-      if(!h._touchStartTime || (Date.now() - h._touchStartTime) < 200) {
-        toggleCategory(h.dataset.categoriaId);
+  // ============================================
+  // DRAG & DROP TÁCTIL - Items
+  // ============================================
+  document.querySelectorAll('[data-action="item-drag"]').forEach(handle => {
+    handle.ontouchstart = function(e) {
+      if (!editMode) return;
+      const item = this.closest('.item');
+      const catId = this.dataset.categoria;
+      const index = parseInt(this.dataset.index);
+      const text = this.dataset.text || 'Item';
+      startTouchDrag(e, 'item', item, { catId, index, text });
+    };
+  });
+  
+  // ============================================
+  // DRAG & DROP TÁCTIL - Categorías
+  // ============================================
+  document.querySelectorAll('[data-action="cat-drag"]').forEach(handle => {
+    handle.ontouchstart = function(e) {
+      if (!editMode) return;
+      const wrapper = this.closest('.categoria-wrapper');
+      const catId = this.dataset.categoria;
+      startTouchDrag(e, 'category', wrapper, { catId });
+    };
+  });
+  
+  // ============================================
+  // DRAG & DROP con Mouse (para desktop)
+  // ============================================
+  document.querySelectorAll('.item').forEach(item => {
+    item.ondragstart = function(e) {
+      if (!editMode) return;
+      if (!('ontouchstart' in window)) {
+        const cat = this.dataset.categoria;
+        const index = parseInt(this.dataset.index);
+        touchDrag.data = { catId: cat, index };
+        this.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', `${cat}|${index}`);
+        setTimeout(() => this.style.opacity = '0.4', 0);
       }
-      h._touchStartTime = null;
     };
-    h.ontouchstart = function(e) {
-      h._touchStartTime = Date.now();
+    item.ondragend = function(e) {
+      if (!('ontouchstart' in window)) {
+        this.classList.remove('dragging');
+        this.style.opacity = '1';
+        document.querySelectorAll('.item.drag-over').forEach(el => el.classList.remove('drag-over'));
+      }
     };
-    h.onclick = function(e) {
-      if(e.target.closest('.categoria-actions'))return;
-      if(e.target.closest('.icon-btn'))return;
-      // Si se hizo clic en el nombre en modo edición, NO colapsar (se activa edición)
-      if(e.target.closest('.cat-name') && editMode)return;
-      if(e.target.closest('.item-text') && editMode)return;
-      if(!('ontouchstart' in window)) {
-        toggleCategory(h.dataset.categoriaId);
+    item.ondragover = function(e) {
+      if (!('ontouchstart' in window)) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        const cat = this.dataset.categoria;
+        const index = parseInt(this.dataset.index);
+        if (!touchDrag.data || cat !== touchDrag.data.catId || index === touchDrag.data.index) return;
+        document.querySelectorAll('.item.drag-over').forEach(el => el.classList.remove('drag-over'));
+        this.classList.add('drag-over');
+        touchDrag.currentTarget = this;
+      }
+    };
+    item.ondragleave = function() {
+      if (!('ontouchstart' in window)) {
+        this.classList.remove('drag-over');
+      }
+    };
+    item.ondrop = function(e) {
+      if (!('ontouchstart' in window)) {
+        e.preventDefault();
+        if (!touchDrag.data || !touchDrag.currentTarget) return;
+        const targetItem = touchDrag.currentTarget;
+        const fromCat = touchDrag.data.catId;
+        const fromIndex = touchDrag.data.index;
+        const toCat = targetItem.dataset.categoria;
+        const toIndex = parseInt(targetItem.dataset.index);
+        if (fromCat === toCat && fromIndex !== toIndex) {
+          const items = data[fromCat];
+          if (items) {
+            const [moved] = items.splice(fromIndex, 1);
+            items.splice(toIndex, 0, moved);
+            saveData();
+            render();
+          }
+        }
+        document.querySelectorAll('.item.drag-over').forEach(el => el.classList.remove('drag-over'));
+        touchDrag.data = null;
+        touchDrag.currentTarget = null;
+      }
+    };
+  });
+  
+  // Drag & Drop categorías con mouse
+  document.querySelectorAll('.categoria-wrapper').forEach(w => {
+    w.ondragstart = function(e) {
+      if (!editMode) return;
+      if (!('ontouchstart' in window)) {
+        if (e.target.closest('.item')) return;
+        const catId = this.dataset.categoriaId;
+        touchDrag.data = { catId };
+        this.classList.add('dragging-cat');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', catId);
+        setTimeout(() => this.style.opacity = '0.4', 0);
+      }
+    };
+    w.ondragend = function() {
+      if (!('ontouchstart' in window)) {
+        this.classList.remove('dragging-cat');
+        this.style.opacity = '1';
+        document.querySelectorAll('.categoria-wrapper.drag-over-cat').forEach(el => el.classList.remove('drag-over-cat'));
+      }
+    };
+    w.ondragover = function(e) {
+      if (!('ontouchstart' in window)) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        const catId = this.dataset.categoriaId;
+        if (!touchDrag.data || catId === touchDrag.data.catId) return;
+        document.querySelectorAll('.categoria-wrapper.drag-over-cat').forEach(el => el.classList.remove('drag-over-cat'));
+        this.classList.add('drag-over-cat');
+        touchDrag.currentTarget = this;
+      }
+    };
+    w.ondragleave = function() {
+      if (!('ontouchstart' in window)) {
+        this.classList.remove('drag-over-cat');
+      }
+    };
+    w.ondrop = function(e) {
+      if (!('ontouchstart' in window)) {
+        e.preventDefault();
+        if (!touchDrag.data || !touchDrag.currentTarget) return;
+        const fromId = touchDrag.data.catId;
+        const toId = touchDrag.currentTarget.dataset.categoriaId;
+        if (fromId !== toId) {
+          const fromIndex = categories.findIndex(c => c.id === fromId);
+          const toIndex = categories.findIndex(c => c.id === toId);
+          if (fromIndex !== -1 && toIndex !== -1) {
+            const [moved] = categories.splice(fromIndex, 1);
+            categories.splice(toIndex, 0, moved);
+            saveData();
+            render();
+          }
+        }
+        document.querySelectorAll('.categoria-wrapper.drag-over-cat').forEach(el => el.classList.remove('drag-over-cat'));
+        touchDrag.data = null;
+        touchDrag.currentTarget = null;
       }
     };
   });
 
-  // Click en texto de categoría para editar (en modo edición)
+  // ============================================
+  // RESTO DE EVENTOS (click, checkbox, etc)
+  // ============================================
+  
+  // Click en header para colapsar
+  document.querySelectorAll('.categoria-header').forEach(h=>{
+    h.onclick = function(e) {
+      if(e.target.closest('.categoria-actions'))return;
+      if(e.target.closest('.icon-btn'))return;
+      if(e.target.closest('.cat-name') && editMode)return;
+      if(e.target.closest('.item-text') && editMode)return;
+      toggleCategory(this.dataset.categoriaId);
+    };
+  });
+
+  // Click en texto de categoría para editar
   document.querySelectorAll('[data-action="cat-text-click"]').forEach(el=>{
     el.onclick=e=>{
       if(!editMode)return;
       e.stopPropagation();
-      const catId=el.dataset.categoria;
-      startEditCat(catId);
+      startEditCat(el.dataset.categoria);
     };
   });
 
-  // Click en texto de item para editar (en modo edición)
+  // Click en texto de item para editar
   document.querySelectorAll('[data-action="item-text-click"]').forEach(el=>{
     el.onclick=e=>{
       if(!editMode)return;
@@ -417,7 +706,7 @@ function attachEvents(){
     };
   });
 
-  // Input de edición de categoría - Enter o blur
+  // Input de edición de categoría
   document.querySelectorAll('.categoria-titulo-input').forEach(inp=>{
     inp.onkeydown=e=>{
       if(e.key==='Enter'){
@@ -440,7 +729,7 @@ function attachEvents(){
     };
   });
 
-  // Input de edición de item - Enter o blur
+  // Input de edición de item
   document.querySelectorAll('.item-text-input').forEach(inp=>{
     inp.onkeydown=e=>{
       if(e.key==='Enter'){
@@ -509,72 +798,6 @@ function attachEvents(){
     inp.onkeydown=e=>{if(e.key==='Enter')inp.closest('.categoria').querySelector('.add-item-confirm').click();};
   });
 
-  // Drag & Drop Items (solo si no es táctil)
-  if(editMode && dragEnabled){
-    document.querySelectorAll('.item').forEach(item=>{
-      item.ondragstart=e=>{
-        if(!editMode)return;
-        const cat=item.dataset.categoria,index=parseInt(item.dataset.index);
-        dragData={cat,index};item.classList.add('dragging');
-        e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',`${cat}|${index}`);
-        setTimeout(()=>item.style.opacity='0.4',0);
-      };
-      item.ondragend=e=>{
-        item.classList.remove('dragging');item.style.opacity='1';
-        document.querySelectorAll('.item.drag-over').forEach(el=>el.classList.remove('drag-over'));
-        dragData=null;dragOverData=null;
-      };
-      item.ondragover=e=>{
-        e.preventDefault();e.dataTransfer.dropEffect='move';
-        const cat=item.dataset.categoria,index=parseInt(item.dataset.index);
-        if(!dragData||cat!==dragData.cat||index===dragData.index)return;
-        document.querySelectorAll('.item.drag-over').forEach(el=>el.classList.remove('drag-over'));
-        item.classList.add('drag-over');dragOverData={cat,index};
-      };
-      item.ondragleave=()=>item.classList.remove('drag-over');
-      item.ondrop=e=>{
-        e.preventDefault();
-        if(!dragData||!dragOverData||dragData.cat!==dragOverData.cat||dragData.index===dragOverData.index)return;
-        const [moved]=data[dragData.cat].splice(dragData.index,1);
-        data[dragData.cat].splice(dragOverData.index,0,moved);
-        saveData();render();dragData=null;dragOverData=null;
-      };
-    });
-
-    // Drag & Drop Categorías (solo si no es táctil)
-    document.querySelectorAll('.categoria-wrapper').forEach(w=>{
-      w.ondragstart=e=>{
-        if(!editMode)return;
-        if(e.target.closest('.item'))return;
-        const catId=w.dataset.categoriaId;
-        catDragData={catId};w.classList.add('dragging-cat');
-        e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',catId);
-        setTimeout(()=>w.style.opacity='0.4',0);
-      };
-      w.ondragend=()=>{
-        w.classList.remove('dragging-cat');w.style.opacity='1';
-        document.querySelectorAll('.categoria-wrapper.drag-over-cat').forEach(el=>el.classList.remove('drag-over-cat'));
-        catDragData=null;catDragOverData=null;
-      };
-      w.ondragover=e=>{
-        e.preventDefault();e.dataTransfer.dropEffect='move';
-        const catId=w.dataset.categoriaId;
-        if(!catDragData||catId===catDragData.catId)return;
-        document.querySelectorAll('.categoria-wrapper.drag-over-cat').forEach(el=>el.classList.remove('drag-over-cat'));
-        w.classList.add('drag-over-cat');catDragOverData={catId};
-      };
-      w.ondragleave=()=>w.classList.remove('drag-over-cat');
-      w.ondrop=e=>{
-        e.preventDefault();
-        if(!catDragData||!catDragOverData||catDragData.catId===catDragOverData.catId)return;
-        const from=categories.findIndex(c=>c.id===catDragData.catId);
-        const to=categories.findIndex(c=>c.id===catDragOverData.catId);
-        if(from!==-1&&to!==-1){const[moved]=categories.splice(from,1);categories.splice(to,0,moved);saveData();render();}
-        catDragData=null;catDragOverData=null;
-      };
-    });
-  }
-
   // Botones principales
   document.getElementById('resetBtn').onclick=()=>{
     if(confirm('¿Desmarcar todos los productos?')){
@@ -621,7 +844,10 @@ function attachEvents(){
   };
 }
 
-loadData();render();
+// Inicializar sistema de drag táctil
+initTouchDrag();
+loadData();
+render();
 </script>
 </body>
 </html>
