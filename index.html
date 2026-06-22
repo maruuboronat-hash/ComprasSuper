@@ -536,4 +536,288 @@ function attachEvents(){
         e.preventDefault();
         if (!touchDrag.data || !touchDrag.currentTarget) return;
         const targetItem = touchDrag.currentTarget;
-        const fromCat
+        const fromCat = touchDrag.data.catId;
+        const fromIndex = touchDrag.data.index;
+        const toCat = targetItem.dataset.categoria;
+        const toIndex = parseInt(targetItem.dataset.index);
+        if (fromCat === toCat && fromIndex !== toIndex) {
+          const items = data[fromCat];
+          if (items) {
+            const [moved] = items.splice(fromIndex, 1);
+            items.splice(toIndex, 0, moved);
+            saveData();
+            render();
+          }
+        }
+        document.querySelectorAll('.item.drag-over').forEach(el => el.classList.remove('drag-over'));
+        touchDrag.data = null;
+        touchDrag.currentTarget = null;
+      }
+    };
+  });
+  
+  // Drag & Drop categorías con mouse
+  document.querySelectorAll('.categoria-wrapper').forEach(w => {
+    w.ondragstart = function(e) {
+      if (!editMode) return;
+      if (!('ontouchstart' in window)) {
+        if (e.target.closest('.item')) return;
+        const catId = this.dataset.categoriaId;
+        touchDrag.data = { catId };
+        this.classList.add('dragging-cat');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', catId);
+        setTimeout(() => this.style.opacity = '0.4', 0);
+      }
+    };
+    w.ondragend = function() {
+      if (!('ontouchstart' in window)) {
+        this.classList.remove('dragging-cat');
+        this.style.opacity = '1';
+        document.querySelectorAll('.categoria-wrapper.drag-over-cat').forEach(el => el.classList.remove('drag-over-cat'));
+      }
+    };
+    w.ondragover = function(e) {
+      if (!('ontouchstart' in window)) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        const catId = this.dataset.categoriaId;
+        if (!touchDrag.data || catId === touchDrag.data.catId) return;
+        document.querySelectorAll('.categoria-wrapper.drag-over-cat').forEach(el => el.classList.remove('drag-over-cat'));
+        this.classList.add('drag-over-cat');
+        touchDrag.currentTarget = this;
+      }
+    };
+    w.ondragleave = function() {
+      if (!('ontouchstart' in window)) {
+        this.classList.remove('drag-over-cat');
+      }
+    };
+    w.ondrop = function(e) {
+      if (!('ontouchstart' in window)) {
+        e.preventDefault();
+        if (!touchDrag.data || !touchDrag.currentTarget) return;
+        const fromId = touchDrag.data.catId;
+        const toId = touchDrag.currentTarget.dataset.categoriaId;
+        if (fromId !== toId) {
+          const fromIndex = categories.findIndex(c => c.id === fromId);
+          const toIndex = categories.findIndex(c => c.id === toId);
+          if (fromIndex !== -1 && toIndex !== -1) {
+            const [moved] = categories.splice(fromIndex, 1);
+            categories.splice(toIndex, 0, moved);
+            saveData();
+            render();
+          }
+        }
+        document.querySelectorAll('.categoria-wrapper.drag-over-cat').forEach(el => el.classList.remove('drag-over-cat'));
+        touchDrag.data = null;
+        touchDrag.currentTarget = null;
+      }
+    };
+  });
+
+  // RESTO DE EVENTOS
+  document.querySelectorAll('.categoria-header').forEach(h=>{
+    h.onclick = function(e) {
+      if(e.target.closest('.categoria-actions'))return;
+      if(e.target.closest('.icon-btn'))return;
+      if(e.target.closest('.cat-name') && editMode)return;
+      if(e.target.closest('.item-text') && editMode)return;
+      toggleCategory(this.dataset.categoriaId);
+    };
+  });
+
+  document.querySelectorAll('[data-action="cat-text-click"]').forEach(el=>{
+    el.onclick=e=>{
+      if(!editMode)return;
+      e.stopPropagation();
+      startEditCat(el.dataset.categoria);
+    };
+  });
+
+  document.querySelectorAll('[data-action="item-text-click"]').forEach(el=>{
+    el.onclick=e=>{
+      if(!editMode)return;
+      e.stopPropagation();
+      const cat=el.dataset.categoria;
+      const index=parseInt(el.dataset.index);
+      startEditItem(cat,index);
+    };
+  });
+
+  document.querySelectorAll('.item-checkbox').forEach(cb=>{
+    cb.onchange=e=>{
+      const cat=e.target.dataset.categoria,index=parseInt(e.target.dataset.index);
+      if(data[cat]&&data[cat][index]){
+        data[cat][index].checked=e.target.checked;
+        saveData();
+        const span=e.target.closest('.item').querySelector('.item-text');
+        if(span)span.classList.toggle('checked',e.target.checked);
+        updateCount();
+      }
+    };
+  });
+
+  document.querySelectorAll('.item-delete').forEach(btn=>{
+    btn.onclick=e=>{
+      if(!editMode)return;
+      e.stopPropagation();
+      const cat=btn.dataset.categoria,index=parseInt(btn.dataset.index);
+      if(data[cat]){data[cat].splice(index,1);saveData();render();}
+    };
+  });
+
+  document.querySelectorAll('[data-action="item-edit"]').forEach(btn=>{
+    btn.onclick=e=>{
+      e.stopPropagation();
+      const cat=btn.dataset.categoria,index=parseInt(btn.dataset.index);
+      startEditItem(cat,index);
+    };
+  });
+
+  document.querySelectorAll('[data-action="cat-edit"]').forEach(btn=>{
+    btn.onclick=e=>{
+      e.stopPropagation();
+      startEditCat(btn.dataset.categoria);
+    };
+  });
+
+  document.querySelectorAll('.categoria-titulo-input').forEach(inp=>{
+    inp.onkeydown=e=>{
+      if(e.key==='Enter'){
+        const val=inp.value.trim();
+        if(val){
+          const cat=categories.find(c=>c.id===inp.dataset.categoriaId);
+          if(cat){cat.nombre=val;saveData();editingCat=null;render();}
+        } else {editingCat=null;render();}
+      }
+      if(e.key==='Escape'){editingCat=null;render();}
+    };
+    inp.onblur=()=>{
+      const val=inp.value.trim();
+      if(val){
+        const cat=categories.find(c=>c.id===inp.dataset.categoriaId);
+        if(cat){cat.nombre=val;saveData();}
+      }
+      editingCat=null;
+      render();
+    };
+  });
+
+  document.querySelectorAll('.item-text-input').forEach(inp=>{
+    inp.onkeydown=e=>{
+      if(e.key==='Enter'){
+        const val=inp.value.trim();
+        const cat=inp.dataset.categoria,index=parseInt(inp.dataset.index);
+        if(val&&data[cat]&&data[cat][index]){data[cat][index].text=val;saveData();editingItem=null;render();}
+        else {editingItem=null;render();}
+      }
+      if(e.key==='Escape'){editingItem=null;render();}
+    };
+    inp.onblur=()=>{
+      const val=inp.value.trim();
+      const cat=inp.dataset.categoria,index=parseInt(inp.dataset.index);
+      if(val&&data[cat]&&data[cat][index]){data[cat][index].text=val;saveData();}
+      editingItem=null;
+      render();
+    };
+  });
+
+  document.querySelectorAll('.icon-btn[data-categoria]').forEach(btn=>{
+    if(btn.dataset.action==='cat-delete'){
+      btn.onclick=e=>{
+        if(!editMode)return;
+        e.stopPropagation();
+        const catId=btn.dataset.categoria;
+        if(categories.length<=1){alert('Debe haber al menos una categoría');return;}
+        if(confirm(`¿Eliminar "${categories.find(c=>c.id===catId)?.nombre}"?`)){
+          const idx=categories.findIndex(c=>c.id===catId);
+          if(idx!==-1){categories.splice(idx,1);delete data[catId];delete collapsedCategories[catId];saveData();render();}
+        }
+      };
+    } else if(btn.dataset.action!=='cat-edit' && btn.dataset.action!=='item-edit') {
+      btn.onclick=e=>{
+        e.stopPropagation();
+        const cat=btn.dataset.categoria;
+        const catDiv=btn.closest('.categoria');
+        const cont=catDiv.querySelector('.add-item-input-container');
+        const inp=cont.querySelector('.add-item-input');
+        cont.classList.toggle('show');
+        if(cont.classList.contains('show'))setTimeout(()=>inp.focus(),50);
+      };
+    }
+  });
+
+  document.querySelectorAll('.add-item-confirm').forEach(btn=>{
+    btn.onclick=e=>{
+      e.stopPropagation();
+      const cat=btn.dataset.categoria;
+      const catDiv=btn.closest('.categoria');
+      const inp=catDiv.querySelector('.add-item-input');
+      const text=inp.value.trim();
+      if(text&&data[cat]){
+        data[cat].push({text,checked:false});
+        saveData();render();
+        setTimeout(()=>{
+          const c=document.querySelector(`[data-categoria-id="${cat}"]`);
+          if(c){const ni=c.closest('.categoria')?.querySelector('.add-item-input');if(ni){ni.value='';ni.focus();}}
+        },50);
+      }
+    };
+  });
+
+  document.querySelectorAll('.add-item-input').forEach(inp=>{
+    inp.onkeydown=e=>{if(e.key==='Enter')inp.closest('.categoria').querySelector('.add-item-confirm').click();};
+  });
+
+  document.getElementById('resetBtn').onclick=()=>{
+    if(confirm('¿Desmarcar todos los productos?')){
+      Object.keys(data).forEach(cat=>data[cat].forEach(i=>{i.checked=false;}));
+      saveData();render();
+    }
+  };
+
+  document.getElementById('editBtn').onclick=()=>{
+    editMode=!editMode;
+    const btn=document.getElementById('editBtn');
+    btn.innerHTML=editMode?'<i class="ti ti-check"></i> Listo':'<i class="ti ti-pencil"></i> Editar';
+    btn.classList.toggle('active',editMode);
+    if(!editMode){document.getElementById('addCategoriaTop').classList.remove('show');editingItem=null;editingCat=null;}
+    render();
+  };
+
+  document.getElementById('btnNuevaCategoria').onclick=()=>{
+    const c=document.getElementById('addCategoriaTop');
+    c.classList.toggle('show');
+    if(c.classList.contains('show'))setTimeout(()=>document.getElementById('addCategoriaInput').focus(),50);
+  };
+
+  document.getElementById('cancelCategoriaBtn').onclick=()=>{
+    document.getElementById('addCategoriaTop').classList.remove('show');
+    document.getElementById('addCategoriaInput').value='';
+  };
+
+  document.getElementById('addCategoriaBtn').onclick=()=>{
+    const inp=document.getElementById('addCategoriaInput');
+    const sel=document.getElementById('addCategoriaIcon');
+    const name=inp.value.trim();
+    if(!name){alert('Ingresá un nombre para la categoría');return;}
+    const id=name.toLowerCase().replace(/[^a-z0-9]/g,'_')+Date.now();
+    categories.push({id,icon:sel.value,nombre:name,items:[]});
+    data[id]=[];collapsedCategories[id]=false;
+    saveData();render();inp.value='';
+    document.getElementById('addCategoriaTop').classList.remove('show');
+  };
+
+  document.getElementById('addCategoriaInput').onkeydown=e=>{
+    if(e.key==='Enter')document.getElementById('addCategoriaBtn').click();
+    if(e.key==='Escape')document.getElementById('cancelCategoriaBtn').click();
+  };
+}
+
+initTouchDrag();
+loadData();
+render();
+</script>
+</body>
+</html>
